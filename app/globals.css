@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { font-family: 'Inter', sans-serif; }
+  body { @apply bg-white text-navy-950 antialiased; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 bg-ghana-red text-white font-semibold
+           rounded-xl hover:bg-red-700 transition-all duration-200 shadow-sm
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3 bg-navy-950 text-white font-semibold
+           rounded-xl hover:bg-navy-800 transition-all duration-200;
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-2 px-6 py-3 border-2 border-navy-950 text-navy-950
+           font-semibold rounded-xl hover:bg-navy-50 transition-all duration-200;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-navy-100;
+  }
+  .input {
+    @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-navy-950
+           focus:outline-none focus:ring-2 focus:ring-navy-700 focus:border-transparent
+           placeholder:text-gray-400 transition-all;
+  }
+  .severity-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+  .severity-critical { @apply severity-badge bg-red-50 text-red-700; }
+  .severity-high     { @apply severity-badge bg-orange-50 text-orange-700; }
+  .severity-medium   { @apply severity-badge bg-amber-50 text-amber-700; }
+  .severity-low      { @apply severity-badge bg-blue-50 text-blue-700; }
+  .severity-info     { @apply severity-badge bg-gray-100 text-gray-600; }
+  .severity-pass     { @apply severity-badge bg-green-50 text-green-700; }
+}
