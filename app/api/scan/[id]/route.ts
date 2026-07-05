@@ -14,7 +14,15 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     const findings = await query(
-      'SELECT * FROM findings WHERE scan_id = ? ORDER BY FIELD(severity,"critical","high","medium","low","info","pass")',
+      `SELECT * FROM findings WHERE scan_id = $1
+       ORDER BY CASE severity
+         WHEN 'critical' THEN 1
+         WHEN 'high'     THEN 2
+         WHEN 'medium'   THEN 3
+         WHEN 'low'      THEN 4
+         WHEN 'info'     THEN 5
+         WHEN 'pass'     THEN 6
+         ELSE 7 END`,
       [params.id]
     );
 

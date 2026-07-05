@@ -1,52 +1,51 @@
--- CyberGH Database Schema
--- Run this once against your Aiven MySQL instance
-
-CREATE DATABASE IF NOT EXISTS cybergh
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE cybergh;
+-- CyberGH Database Schema (PostgreSQL)
+-- Run this once against your Aiven PostgreSQL instance
 
 -- ── Scans ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS scans (
-  id           VARCHAR(36)   NOT NULL PRIMARY KEY,  -- UUID
+  id           VARCHAR(36)   NOT NULL PRIMARY KEY,
   domain       VARCHAR(255)  NOT NULL,
-  email        VARCHAR(255)  NULL,                   -- captured to unlock full report
-  score        TINYINT       NULL,                   -- 0–100, set when scan completes
-  status       ENUM('pending','running','complete','failed') NOT NULL DEFAULT 'pending',
-  created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  completed_at DATETIME      NULL,
-  INDEX idx_domain (domain),
-  INDEX idx_email  (email),
-  INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  email        VARCHAR(255)  NULL,
+  score        SMALLINT      NULL,
+  status       VARCHAR(20)   NOT NULL DEFAULT 'pending'
+                             CHECK (status IN ('pending','running','complete','failed')),
+  created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ   NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_scans_domain ON scans(domain);
+CREATE INDEX IF NOT EXISTS idx_scans_email  ON scans(email);
+CREATE INDEX IF NOT EXISTS idx_scans_status ON scans(status);
 
 -- ── Findings ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS findings (
-  id          INT UNSIGNED  NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  scan_id     VARCHAR(36)   NOT NULL,
-  category    VARCHAR(64)   NOT NULL,  -- 'ssl', 'headers', 'paths', 'dns', 'ports', 'breach'
-  severity    ENUM('critical','high','medium','low','info','pass') NOT NULL,
+  id          SERIAL        PRIMARY KEY,
+  scan_id     VARCHAR(36)   NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+  category    VARCHAR(64)   NOT NULL,
+  severity    VARCHAR(20)   NOT NULL
+                            CHECK (severity IN ('critical','high','medium','low','info','pass')),
   title       VARCHAR(255)  NOT NULL,
-  description TEXT          NOT NULL,  -- what this means in plain language
-  fix         TEXT          NULL,       -- exactly how to fix it
-  evidence    TEXT          NULL,       -- raw value we found (e.g. the header value)
-  created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE,
-  INDEX idx_scan_id  (scan_id),
-  INDEX idx_severity (severity)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  description TEXT          NOT NULL,
+  fix         TEXT          NULL,
+  evidence    TEXT          NULL,
+  created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_findings_scan_id  ON findings(scan_id);
+CREATE INDEX IF NOT EXISTS idx_findings_severity ON findings(severity);
 
 -- ── Users ──────────────────────────────────────────────────────
--- Added now but used from Week 3 (subscription tier)
 CREATE TABLE IF NOT EXISTS users (
-  id            INT UNSIGNED  NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  id            SERIAL        PRIMARY KEY,
   email         VARCHAR(255)  NOT NULL UNIQUE,
   password_hash VARCHAR(255)  NOT NULL,
   name          VARCHAR(255)  NULL,
   company       VARCHAR(255)  NULL,
-  plan          ENUM('free','starter','pro') NOT NULL DEFAULT 'free',
-  monitored_domains JSON      NULL,   -- array of domains on subscription
-  created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  plan          VARCHAR(20)   NOT NULL DEFAULT 'free'
+                              CHECK (plan IN ('free','starter','pro')),
+  monitored_domains JSONB     NULL,
+  created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+

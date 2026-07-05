@@ -1,34 +1,29 @@
-import mysql from 'mysql2/promise';
+import { Pool, PoolClient } from 'pg';
 
 // Singleton pool — reused across serverless function invocations
-let pool: mysql.Pool | null = null;
+let pool: Pool | null = null;
 
-function getPool(): mysql.Pool {
+function getPool(): Pool {
   if (pool) return pool;
 
-  const sslConfig = process.env.DB_SSL === 'true'
-    ? { rejectUnauthorized: false }
-    : undefined;
-
-  pool = mysql.createPool({
-    host:     process.env.DB_HOST!,
-    port:     Number(process.env.DB_PORT || 3306),
-    user:     process.env.DB_USER!,
-    password: process.env.DB_PASSWORD!,
-    database: process.env.DB_NAME!,
-    waitForConnections: true,
-    connectionLimit: 3, // low for serverless — avoids Aiven free-tier connection limit
-    queueLimit: 0,
-    charset: 'utf8mb4',
-    ...(sslConfig ? { ssl: sslConfig } : {}),
+  // Aiven provides a full connection string — use it directly if available
+  // Otherwise fall back to individual env vars
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }, // Required for Aiven
+    max: 3, // Low for serverless — avoids Aiven free-tier connection limit
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
   });
 
   return pool;
 }
 
 export async function query<T = any>(sql: string, params?: any[]): Promise<T[]> {
-  const [rows] = await getPool().execute(sql, params);
-  return rows as T[];
+  // PostgreSQL uses $1, $2 placeholders — convert from ? if needed
+  const pgSql = convertPlaceholders(sql);
+  const result = await getPool().query(pgSql, params);
+  return result.rows as T[];
 }
 
 export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T | null> {
@@ -36,7 +31,15 @@ export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T 
   return rows[0] ?? null;
 }
 
-export async function execute(sql: string, params?: any[]): Promise<mysql.ResultSetHeader> {
-  const [result] = await getPool().execute(sql, params);
-  return result as mysql.ResultSetHeader;
+export async function execute(sql: string, params?: any[]): Promise<{ rowCount: number }> {
+  const pgSql = convertPlaceholders(sql);
+  const result = await getPool().query(pgSql, params);
+  return { rowCount: result.rowCount ?? 0 };
 }
+
+// Convert MySQL ? placeholders to PostgreSQL $1, $2, $3...
+function convertPlaceholders(sql: string): string {
+  let i = 0;
+  return sql.replace(/\?/g, () => `$${++i}`);
+}
+
