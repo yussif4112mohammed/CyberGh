@@ -9,14 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.2.3",
+    "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
     "pg": "^8.11.5",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
     "resend": "^3.2.0",
-    "uuid": "^9.0.1",
+    "uuid": "^11.1.1",
     "date-fns": "^3.6.0"
   },
   "devDependencies": {
@@ -31,6 +31,6 @@
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
     "eslint": "^8",
-    "eslint-config-next": "14.2.3"
+    "eslint-config-next": "14.2.35"
   }
 }
