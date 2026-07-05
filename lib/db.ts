@@ -6,12 +6,14 @@ let pool: Pool | null = null;
 function getPool(): Pool {
   if (pool) return pool;
 
-  // Aiven provides a full connection string — use it directly if available
-  // Otherwise fall back to individual env vars
+  // Strip sslmode from connection string — we handle SSL via the ssl config below
+  // to ensure rejectUnauthorized:false is respected (Aiven uses self-signed certs)
+  const connStr = (process.env.DATABASE_URL || '').replace(/[?&]sslmode=[^&]*/g, '');
+
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }, // Required for Aiven
-    max: 3, // Low for serverless — avoids Aiven free-tier connection limit
+    connectionString: connStr,
+    ssl: { rejectUnauthorized: false },
+    max: 3,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
   });
