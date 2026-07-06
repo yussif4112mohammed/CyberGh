@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200" viewBox="0 0 600 200" role="img">
+  <title>CyberGH — Security for every Ghanaian business</title>
+  <desc>CyberGH logo featuring a navy shield with lock icon and Ghana red accent</desc>
+
+  <!-- Shield body -->
+  <path d="M36 28 L100 28 Q116 28 116 44 L116 112 Q116 158 68 176 Q20 158 20 112 L20 44 Q20 28 36 28 Z" fill="#0A1628"/>
+
+  <!-- Ghana red bottom accent -->
+  <path d="M20 128 L20 112 Q20 158 68 176 Q116 158 116 112 L116 128 Q116 168 68 182 Q20 168 20 128 Z" fill="#C8102E"/>
+
+  <!-- Lock body -->
+  <rect x="49" y="98" width="38" height="30" rx="4" fill="white"/>
+
+  <!-- Lock shackle -->
+  <path d="M58 98 L58 85 Q58 72 68 72 Q78 72 78 85 L78 98" fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Lock keyhole -->
+  <circle cx="68" cy="111" r="5" fill="#0A1628"/>
+  <rect x="66" y="111" width="4" height="8" rx="1" fill="#0A1628"/>
+
+  <!-- Wordmark: Cyber -->
+  <text x="136" y="122" font-family="-apple-system, Inter, sans-serif" font-weight="700" font-size="72" fill="#0A1628">Cyber</text>
+
+  <!-- Wordmark: GH -->
+  <text x="382" y="122" font-family="-apple-system, Inter, sans-serif" font-weight="700" font-size="72" fill="#C8102E">GH</text>
+
+  <!-- Tagline -->
+  <text x="136" y="148" font-family="-apple-system, Inter, sans-serif" font-weight="400" font-size="13" fill="#6B7280" letter-spacing="2">SECURITY FOR EVERY GHANAIAN BUSINESS</text>
+
+  <!-- Red rule -->
+  <rect x="136" y="156" width="448" height="2" rx="1" fill="#C8102E" opacity="0.4"/>
+</svg>
