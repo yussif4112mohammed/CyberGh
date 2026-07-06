@@ -25,11 +25,14 @@ export default function ReportPage() {
 
   useEffect(() => {
     if (!scanId) return;
-    fetch(`/api/scan/${scanId}`)
+    const url = scanId === 'demo' ? '/api/demo' : `/api/scan/${scanId}`;
+    fetch(url)
       .then(r => r.json())
       .then(data => {
-        if (data.result) setResult(data.result);
-        else setError('Report not found.');
+        if (data.result) {
+          setResult(data.result);
+          if (scanId === 'demo') setShowFullReport(true); // show full report for demo
+        } else setError('Report not found.');
       })
       .catch(() => setError('Failed to load report.'))
       .finally(() => setLoading(false));
