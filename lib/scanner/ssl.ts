@@ -76,7 +76,7 @@ export async function checkSSL(domain: string): Promise<Finding[]> {
             title: 'SSL certificate chain is not trusted',
             description: 'Your SSL certificate exists but the chain of trust is broken — browsers will show a security warning. This usually means a missing intermediate certificate.',
             fix: 'Contact your SSL provider or hosting company and ask them to reinstall the certificate with the full chain (root + intermediate + your cert).',
-            evidence: socket.authorizationError || 'Authorization failed',
+            evidence: (socket.authorizationError as any)?.message || socket.authorizationError || 'Authorization failed',
           });
         }
 
