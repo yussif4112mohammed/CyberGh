@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { ScanResult } from '@/types/scan';
 
+export const dynamic = 'force-dynamic';
+
 // Static demo result — shows when someone clicks "See a sample report"
 // Uses a fictional domain so no real business is identified
 const DEMO: ScanResult = {

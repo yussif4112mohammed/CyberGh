@@ -3,6 +3,8 @@ import { queryOne, query, execute } from '@/lib/db';
 import { ScanResult } from '@/types/scan';
 import { sendReportEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const scan = await queryOne(

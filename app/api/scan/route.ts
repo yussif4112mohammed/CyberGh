@@ -3,8 +3,7 @@ import { runScan } from '@/lib/scanner';
 import { execute, query } from '@/lib/db';
 import { Finding } from '@/types/scan';
 
-// Tell Vercel to allow up to 60 seconds for this function
-// (free tier allows 10s, Pro allows 300s — 60s is a safe middle ground)
+export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 // ── Rate limiting (in-memory, resets on cold start) ────────────
