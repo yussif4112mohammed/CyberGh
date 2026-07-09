@@ -1,7 +1,11 @@
-import { Resend } from 'resend';
 import { ScanResult } from '@/types/scan';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization — don't crash if RESEND_API_KEY is missing
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  const { Resend } = require('resend');
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: '#C8102E',
@@ -249,16 +253,21 @@ export async function sendReportEmail(
   scanId: string
 ): Promise<boolean> {
   try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('Email skipped — RESEND_API_KEY not set');
+      return false;
+    }
+
     const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://cyber-gh.vercel.app'}/report/${scanId}`;
     const scoreLabel = getScoreLabel(result.score);
+    const toEmail = process.env.RESEND_TEST_MODE === 'true'
+      ? (process.env.RESEND_VERIFIED_EMAIL || email)
+      : email;
 
     await resend.emails.send({
       from: 'CyberGH <onboarding@resend.dev>',
-      // In test mode (no custom domain), Resend only delivers to your verified email
-      // Once you add a domain on Resend, remove this override
-      to: process.env.RESEND_TEST_MODE === 'true'
-        ? (process.env.RESEND_VERIFIED_EMAIL || email)
-        : email,
+      to: toEmail,
       subject: `Your security report for ${result.domain} — Score: ${result.score}/100 (${scoreLabel})`,
       html: buildReportEmail(result, reportUrl),
     });
