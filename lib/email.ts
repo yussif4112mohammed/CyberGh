@@ -253,8 +253,12 @@ export async function sendReportEmail(
     const scoreLabel = getScoreLabel(result.score);
 
     await resend.emails.send({
-      from: 'CyberGH <reports@cybergh.app>',
-      to: email,
+      from: 'CyberGH <onboarding@resend.dev>',
+      // In test mode (no custom domain), Resend only delivers to your verified email
+      // Once you add a domain on Resend, remove this override
+      to: process.env.RESEND_TEST_MODE === 'true'
+        ? (process.env.RESEND_VERIFIED_EMAIL || email)
+        : email,
       subject: `Your security report for ${result.domain} — Score: ${result.score}/100 (${scoreLabel})`,
       html: buildReportEmail(result, reportUrl),
     });
