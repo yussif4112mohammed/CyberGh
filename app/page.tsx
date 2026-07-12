@@ -11,6 +11,7 @@ const CHECKS_DISPLAY = [
   { icon: Mail,     label: 'Email Security (SPF/DMARC)' },
   { icon: Server,   label: 'Open Port Exposure' },
   { icon: Database, label: 'Data Breach Exposure' },
+  { icon: Globe,    label: 'WordPress Security (9 checks)' },
 ];
 
 const STATS = [
@@ -39,6 +40,7 @@ export default function HomePage() {
       'Checking email security (SPF/DMARC)...',
       'Scanning open ports...',
       'Checking data breach exposure...',
+      'Running WordPress security checks...',
       'Calculating security score...',
     ];
 

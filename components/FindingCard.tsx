@@ -13,14 +13,15 @@ const SEVERITY_CONFIG: Record<Severity, { label: string; icon: any; classes: str
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  ssl:      'SSL/TLS',
-  headers:  'Security Headers',
-  paths:    'Exposed Files',
-  dns:      'Email Security',
-  ports:    'Open Ports',
-  cookies:  'Cookies',
-  breach:   'Data Breach',
-  leakage:  'Info Leakage',
+  ssl:       'SSL/TLS',
+  headers:   'Security Headers',
+  paths:     'Exposed Files',
+  dns:       'Email Security',
+  ports:     'Open Ports',
+  cookies:   'Cookies',
+  breach:    'Data Breach',
+  leakage:   'Info Leakage',
+  wordpress: 'WordPress',
 };
 
 interface FindingCardProps {

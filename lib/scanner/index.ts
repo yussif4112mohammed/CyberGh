@@ -1,10 +1,11 @@
-import { checkSSL }     from './ssl';
-import { checkHeaders } from './headers';
-import { checkPaths }   from './paths';
-import { checkDNS }     from './dns';
-import { checkPorts }   from './ports';
-import { checkCookies } from './cookies';
-import { checkBreach }  from './breach';
+import { checkSSL }       from './ssl';
+import { checkHeaders }   from './headers';
+import { checkPaths }     from './paths';
+import { checkDNS }       from './dns';
+import { checkPorts }     from './ports';
+import { checkCookies }   from './cookies';
+import { checkBreach }    from './breach';
+import { checkWordPress } from './wordpress';
 import { Finding, ScanResult } from '@/types/scan';
 import { v4 as uuid } from 'uuid';
 
@@ -37,7 +38,7 @@ function summarise(findings: Finding[]) {
   };
 }
 
-export type CheckName = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'cookies' | 'breach';
+export type CheckName = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'cookies' | 'breach' | 'wordpress';
 
 export interface ScanProgress {
   check: CheckName;
@@ -46,13 +47,14 @@ export interface ScanProgress {
 }
 
 export const CHECKS: { name: CheckName; label: string }[] = [
-  { name: 'ssl',     label: 'SSL/TLS Certificate' },
-  { name: 'headers', label: 'Security Headers' },
-  { name: 'paths',   label: 'Exposed Sensitive Files' },
-  { name: 'dns',     label: 'Email Security (SPF/DMARC)' },
-  { name: 'ports',   label: 'Open Port Exposure' },
-  { name: 'cookies', label: 'Cookie Security' },
-  { name: 'breach',  label: 'Data Breach Exposure' },
+  { name: 'ssl',       label: 'SSL/TLS Certificate' },
+  { name: 'headers',   label: 'Security Headers' },
+  { name: 'paths',     label: 'Exposed Sensitive Files' },
+  { name: 'dns',       label: 'Email Security (SPF/DMARC)' },
+  { name: 'ports',     label: 'Open Port Exposure' },
+  { name: 'cookies',   label: 'Cookie Security' },
+  { name: 'breach',    label: 'Data Breach Exposure' },
+  { name: 'wordpress', label: 'WordPress Security' },
 ];
 
 export async function runScan(
@@ -74,17 +76,19 @@ export async function runScan(
   onProgress?.('ports');
   onProgress?.('cookies');
   onProgress?.('breach');
+  onProgress?.('wordpress');
 
-  const [headerF, pathF, dnsF, portF, cookieF, breachF] = await Promise.all([
+  const [headerF, pathF, dnsF, portF, cookieF, breachF, wpF] = await Promise.all([
     checkHeaders(domain),
     checkPaths(domain),
     checkDNS(domain),
     checkPorts(domain),
     checkCookies(domain),
     checkBreach(domain),
+    checkWordPress(domain),
   ]);
 
-  findings.push(...headerF, ...pathF, ...dnsF, ...portF, ...cookieF, ...breachF);
+  findings.push(...headerF, ...pathF, ...dnsF, ...portF, ...cookieF, ...breachF, ...wpF);
 
   // Sort: critical first, passes last
   const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, info: 4, pass: 5 };

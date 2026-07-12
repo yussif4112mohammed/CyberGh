@@ -10,7 +10,7 @@ import { ScanResult } from '@/types/scan';
 const CATEGORY_LABELS: Record<string, string> = {
   ssl: 'SSL/TLS', headers: 'Security Headers', paths: 'Exposed Files',
   dns: 'Email Security', ports: 'Open Ports', cookies: 'Cookies',
-  breach: 'Data Breach', leakage: 'Info Leakage',
+  breach: 'Data Breach', leakage: 'Info Leakage', wordpress: 'WordPress',
 };
 
 export default function ReportPage() {
