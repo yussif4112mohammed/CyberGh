@@ -11,6 +11,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   ssl: 'SSL/TLS', headers: 'Security Headers', paths: 'Exposed Files',
   dns: 'Email Security', ports: 'Open Ports', cookies: 'Cookies',
   breach: 'Data Breach', leakage: 'Info Leakage', wordpress: 'WordPress',
+  redirect: 'HTTP Redirect',
+  subdomain: 'Subdomain',
+  directory: 'Directory Listing',
 };
 
 export default function ReportPage() {

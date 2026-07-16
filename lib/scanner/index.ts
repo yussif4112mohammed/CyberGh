@@ -1,13 +1,16 @@
-import { checkSSL }       from './ssl';
-import { checkHeaders }   from './headers';
-import { checkPaths }     from './paths';
-import { checkDNS }       from './dns';
-import { checkPorts }     from './ports';
-import { checkCookies }   from './cookies';
-import { checkBreach }    from './breach';
-import { checkWordPress } from './wordpress';
-import { Finding, ScanResult } from '@/types/scan';
-import { v4 as uuid } from 'uuid';
+import { checkSSL }              from './ssl';
+import { checkHeaders }          from './headers';
+import { checkPaths }            from './paths';
+import { checkDNS }              from './dns';
+import { checkPorts }            from './ports';
+import { checkCookies }          from './cookies';
+import { checkBreach }           from './breach';
+import { checkWordPress }        from './wordpress';
+import { checkHttpRedirect }     from './redirect';
+import { checkSubdomains }       from './subdomains';
+import { checkDirectoryListing } from './directory';
+import { Finding, ScanResult }   from '@/types/scan';
+import { v4 as uuid }            from 'uuid';
 
 // Weight each severity level's impact on the final score
 const SEVERITY_WEIGHTS = {
@@ -38,13 +41,7 @@ function summarise(findings: Finding[]) {
   };
 }
 
-export type CheckName = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'cookies' | 'breach' | 'wordpress';
-
-export interface ScanProgress {
-  check: CheckName;
-  label: string;
-  status: 'pending' | 'running' | 'done';
-}
+export type CheckName = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'cookies' | 'breach' | 'wordpress' | 'redirect' | 'subdomain' | 'directory';
 
 export const CHECKS: { name: CheckName; label: string }[] = [
   { name: 'ssl',       label: 'SSL/TLS Certificate' },
@@ -55,6 +52,9 @@ export const CHECKS: { name: CheckName; label: string }[] = [
   { name: 'cookies',   label: 'Cookie Security' },
   { name: 'breach',    label: 'Data Breach Exposure' },
   { name: 'wordpress', label: 'WordPress Security' },
+  { name: 'redirect',  label: 'HTTP→HTTPS Redirect & Mixed Content' },
+  { name: 'subdomain', label: 'Subdomain Takeover' },
+  { name: 'directory', label: 'Directory Listing' },
 ];
 
 export async function runScan(
@@ -77,8 +77,11 @@ export async function runScan(
   onProgress?.('cookies');
   onProgress?.('breach');
   onProgress?.('wordpress');
+  onProgress?.('redirect');
+  onProgress?.('subdomain');
+  onProgress?.('directory');
 
-  const [headerF, pathF, dnsF, portF, cookieF, breachF, wpF] = await Promise.all([
+  const [headerF, pathF, dnsF, portF, cookieF, breachF, wpF, redirectF, subdomainF, directoryF] = await Promise.all([
     checkHeaders(domain),
     checkPaths(domain),
     checkDNS(domain),
@@ -86,9 +89,12 @@ export async function runScan(
     checkCookies(domain),
     checkBreach(domain),
     checkWordPress(domain),
+    checkHttpRedirect(domain),
+    checkSubdomains(domain),
+    checkDirectoryListing(domain),
   ]);
 
-  findings.push(...headerF, ...pathF, ...dnsF, ...portF, ...cookieF, ...breachF, ...wpF);
+  findings.push(...headerF, ...pathF, ...dnsF, ...portF, ...cookieF, ...breachF, ...wpF, ...redirectF, ...subdomainF, ...directoryF);
 
   // Sort: critical first, passes last
   const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, info: 4, pass: 5 };

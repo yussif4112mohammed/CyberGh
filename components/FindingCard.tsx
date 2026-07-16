@@ -22,6 +22,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   breach:    'Data Breach',
   leakage:   'Info Leakage',
   wordpress: 'WordPress',
+  redirect: 'HTTP Redirect',
+  subdomain: 'Subdomain',
+  directory: 'Directory Listing',
 };
 
 interface FindingCardProps {

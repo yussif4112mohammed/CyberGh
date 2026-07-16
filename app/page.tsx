@@ -12,6 +12,9 @@ const CHECKS_DISPLAY = [
   { icon: Server,   label: 'Open Port Exposure' },
   { icon: Database, label: 'Data Breach Exposure' },
   { icon: Globe,    label: 'WordPress Security (9 checks)' },
+  { icon: Globe,    label: 'HTTP→HTTPS Redirect & Mixed Content' },
+  { icon: Globe,    label: 'Subdomain Takeover Detection' },
+  { icon: Globe,    label: 'Directory Listing Detection' },
 ];
 
 const STATS = [
@@ -41,6 +44,8 @@ export default function HomePage() {
       'Scanning open ports...',
       'Checking data breach exposure...',
       'Running WordPress security checks...',
+      'Running subdomain checks...',
+      'Checking directory listing...',
       'Calculating security score...',
     ];
 

@@ -1,6 +1,6 @@
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info' | 'pass';
 export type ScanStatus = 'pending' | 'running' | 'complete' | 'failed';
-export type Category = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'breach' | 'cookies' | 'leakage' | 'wordpress';
+export type Category = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'breach' | 'cookies' | 'leakage' | 'wordpress' | 'redirect' | 'subdomain' | 'directory';
 
 export interface Finding {
   id?: number;
