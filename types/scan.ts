@@ -1,6 +1,6 @@
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info' | 'pass';
 export type ScanStatus = 'pending' | 'running' | 'complete' | 'failed';
-export type Category = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'breach' | 'cookies' | 'leakage' | 'wordpress' | 'redirect' | 'subdomain' | 'directory';
+export type Category = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'breach' | 'cookies' | 'leakage' | 'wordpress' | 'redirect' | 'subdomain' | 'directory' | 'fingerprint';
 
 export interface Finding {
   id?: number;
@@ -38,5 +38,6 @@ export interface ScanResult {
   completed_at?: string;
   duration_ms?: number;
   ip_address?: string;
+  previous_scan_id?: string | null;
   logs?: ScanLog[];
 }

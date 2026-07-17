@@ -7,6 +7,7 @@ interface HeaderCheck {
   missing_description: string;
   present_description: string;
   fix: string;
+  recommended?: string;
   validate?: (value: string) => { ok: boolean; note?: string };
 }
 
@@ -18,6 +19,7 @@ const HEADER_CHECKS: HeaderCheck[] = [
     missing_description: 'HSTS is missing. Without it, attackers can intercept connections and redirect users to an insecure (HTTP) version of your site, even if you have SSL.',
     present_description: 'HSTS is enabled — browsers will always use HTTPS for your site.',
     fix: 'Add this header to your server: Strict-Transport-Security: max-age=31536000; includeSubDomains. Ask your hosting provider or developer to add it.',
+    recommended: 'Strict-Transport-Security: max-age=31536000; includeSubDomains; preload',
     validate: (v) => ({
       ok: v.includes('max-age') && parseInt(v.match(/max-age=(\d+)/)?.[1] || '0') >= 31536000,
       note: 'max-age should be at least 31536000 (1 year)',
@@ -30,6 +32,13 @@ const HEADER_CHECKS: HeaderCheck[] = [
     missing_description: 'No Content Security Policy found. This makes your site more vulnerable to cross-site scripting (XSS) attacks — where attackers inject malicious scripts into your pages.',
     present_description: 'Content Security Policy is set.',
     fix: 'Add a Content-Security-Policy header to your server. Start with: Content-Security-Policy: default-src \'self\'. This tells browsers to only load resources from your own domain.',
+    recommended: 'Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' https:; connect-src \'self\'',
+    validate: (v) => {
+      if (v.includes('unsafe-inline') || v.includes('unsafe-eval')) return { ok: false, note: 'CSP contains unsafe directives (unsafe-inline or unsafe-eval)' };
+      if (!v.includes('default-src')) return { ok: false, note: 'CSP is missing default-src directive' };
+      if (v.includes('*')) return { ok: false, note: 'CSP allows all sources (*) — too permissive' };
+      return { ok: true };
+    },
   },
   {
     header: 'x-frame-options',
@@ -38,6 +47,12 @@ const HEADER_CHECKS: HeaderCheck[] = [
     missing_description: 'X-Frame-Options is missing. Without it, attackers can embed your site inside an invisible iframe and trick users into clicking things they didn\'t intend to (clickjacking).',
     present_description: 'Clickjacking protection is in place.',
     fix: 'Add this header: X-Frame-Options: SAMEORIGIN. This prevents your site from being embedded in other sites.',
+    recommended: 'X-Frame-Options: SAMEORIGIN',
+    validate: (v) => {
+      const lower = v.toLowerCase();
+      if (lower !== 'sameorigin' && lower !== 'deny') return { ok: false, note: 'X-Frame-Options should be SAMEORIGIN or DENY' };
+      return { ok: true };
+    },
   },
   {
     header: 'x-content-type-options',
@@ -46,6 +61,11 @@ const HEADER_CHECKS: HeaderCheck[] = [
     missing_description: 'X-Content-Type-Options is missing. Browsers may try to "guess" the type of files you serve, which can be exploited to execute malicious scripts.',
     present_description: 'MIME type sniffing protection is in place.',
     fix: 'Add this header: X-Content-Type-Options: nosniff',
+    recommended: 'X-Content-Type-Options: nosniff',
+    validate: (v) => {
+      if (v.toLowerCase() !== 'nosniff') return { ok: false, note: 'X-Content-Type-Options should be exactly: nosniff' };
+      return { ok: true };
+    },
   },
   {
     header: 'referrer-policy',
@@ -54,6 +74,12 @@ const HEADER_CHECKS: HeaderCheck[] = [
     missing_description: 'No Referrer-Policy set. When users click links on your site, your full URL (including any sensitive query parameters) is sent to the destination site.',
     present_description: 'Referrer policy is configured.',
     fix: 'Add this header: Referrer-Policy: strict-origin-when-cross-origin',
+    recommended: 'Referrer-Policy: strict-origin-when-cross-origin',
+    validate: (v) => {
+      const lower = v.toLowerCase();
+      if (lower === 'unsafe-url' || lower === 'no-referrer-when-downgrade') return { ok: false, note: 'Referrer policy leaks full URL to third parties' };
+      return { ok: true };
+    },
   },
   {
     header: 'permissions-policy',
@@ -62,6 +88,7 @@ const HEADER_CHECKS: HeaderCheck[] = [
     missing_description: 'No Permissions-Policy header found. This header lets you control which browser features (camera, microphone, location) your site can use.',
     present_description: 'Permissions policy is configured.',
     fix: 'Add: Permissions-Policy: geolocation=(), microphone=(), camera=() to restrict unnecessary browser feature access.',
+    recommended: 'Permissions-Policy: geolocation=(), microphone=(), camera=()',
   },
 ];
 
@@ -90,6 +117,7 @@ export async function checkHeaders(domain: string): Promise<Finding[]> {
           title: `Missing: ${check.title}`,
           description: check.missing_description,
           fix: check.fix,
+          evidence: check.recommended ? `[RECOMMENDED: ${check.recommended}]` : undefined,
         });
       } else {
         // If there's a validator, run it
@@ -102,7 +130,7 @@ export async function checkHeaders(domain: string): Promise<Finding[]> {
               title: `Weak configuration: ${check.title}`,
               description: `${check.title} is present but misconfigured. ${note || ''}`,
               fix: check.fix,
-              evidence: value,
+              evidence: check.recommended ? `[DETECTED: ${value}]\n[RECOMMENDED: ${check.recommended}]` : `[DETECTED: ${value}]`,
             });
             continue;
           }

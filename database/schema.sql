@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS scans (
                              CHECK (status IN ('pending','running','complete','failed')),
   ip_address   VARCHAR(45)   NULL,
   duration_ms  INTEGER       NULL,
+  previous_scan_id VARCHAR(36) NULL,
   created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ   NULL
 );

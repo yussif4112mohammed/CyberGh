@@ -26,15 +26,52 @@ const STATS = [
 export default function HomePage() {
   const router = useRouter();
   const [domain, setDomain] = useState('');
+  const [inputMode, setInputMode] = useState<'domain' | 'business'>('domain');
+  const [businessName, setBusinessName] = useState('');
+  const [lookupStatus, setLookupStatus] = useState('');
+  const [lookupError, setLookupError] = useState('');
   const [scanning, setScanning] = useState(false);
   const [currentCheck, setCurrentCheck] = useState('');
   const [error, setError] = useState('');
 
   const startScan = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!domain.trim()) return;
     setError('');
-    setScanning(true);
+    setLookupError('');
+    
+    let scanDomain = domain.trim();
+    
+    // Business name mode: look up the domain first
+    if (inputMode === 'business') {
+      if (!businessName.trim()) return;
+      setScanning(true);
+      setLookupStatus('Finding website for "' + businessName.trim() + '"...');
+      try {
+        const lookupRes = await fetch('/api/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: businessName.trim() }),
+        });
+        const lookupData = await lookupRes.json();
+        if (!lookupRes.ok || !lookupData.domain) {
+          setLookupError(lookupData.error || 'Could not find website. Try entering the domain directly.');
+          setScanning(false);
+          setLookupStatus('');
+          return;
+        }
+        scanDomain = lookupData.domain;
+        setDomain(scanDomain);
+        setLookupStatus(`Found: ${scanDomain} — scanning now...`);
+      } catch {
+        setLookupError('Could not connect. Please try again.');
+        setScanning(false);
+        setLookupStatus('');
+        return;
+      }
+    } else {
+      if (!scanDomain) return;
+      setScanning(true);
+    }
 
     const checks = [
       'Checking SSL certificate...',
@@ -59,7 +96,7 @@ export default function HomePage() {
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: domain.trim() }),
+        body: JSON.stringify({ domain: scanDomain }),
       });
       clearInterval(interval);
 
@@ -104,28 +141,83 @@ export default function HomePage() {
 
             {/* ── The scan input ── */}
             <form onSubmit={startScan} className="max-w-xl mx-auto">
+              {/* Tab switcher */}
+              <div className="flex bg-navy-100 rounded-xl p-1 mb-3">
+                <button
+                  type="button"
+                  id="tab-domain"
+                  onClick={() => { setInputMode('domain'); setLookupError(''); }}
+                  className={`flex-1 text-sm font-medium py-2 px-4 rounded-lg transition-all ${
+                    inputMode === 'domain'
+                      ? 'bg-white text-navy-950 shadow-sm'
+                      : 'text-gray-500 hover:text-navy-950'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5 inline mr-1.5" />Domain
+                </button>
+                <button
+                  type="button"
+                  id="tab-business"
+                  onClick={() => { setInputMode('business'); setLookupError(''); }}
+                  className={`flex-1 text-sm font-medium py-2 px-4 rounded-lg transition-all ${
+                    inputMode === 'business'
+                      ? 'bg-white text-navy-950 shadow-sm'
+                      : 'text-gray-500 hover:text-navy-950'
+                  }`}
+                >
+                  <Search className="w-3.5 h-3.5 inline mr-1.5" />Business Name
+                </button>
+              </div>
+
               <div className="flex gap-3 p-2 bg-navy-50 rounded-2xl border border-navy-100">
                 <div className="flex-1 flex items-center gap-2 bg-white rounded-xl px-4 py-3 border border-gray-200">
-                  <Globe className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={domain}
-                    onChange={e => setDomain(e.target.value)}
-                    placeholder="yourbusiness.com.gh"
-                    className="flex-1 text-navy-950 placeholder:text-gray-400 outline-none text-sm font-medium"
-                    disabled={scanning}
-                    autoFocus
-                  />
+                  {inputMode === 'domain' ? (
+                    <Globe className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  ) : (
+                    <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  )}
+                  {inputMode === 'domain' ? (
+                    <input
+                      type="text"
+                      value={domain}
+                      onChange={e => setDomain(e.target.value)}
+                      placeholder="yourbusiness.com.gh"
+                      className="flex-1 text-navy-950 placeholder:text-gray-400 outline-none text-sm font-medium"
+                      disabled={scanning}
+                      autoFocus
+                      id="domain-input"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={businessName}
+                      onChange={e => setBusinessName(e.target.value)}
+                      placeholder="e.g. Ecobank Ghana, GCB Bank, Melcom"
+                      className="flex-1 text-navy-950 placeholder:text-gray-400 outline-none text-sm font-medium"
+                      disabled={scanning}
+                      autoFocus
+                      id="business-name-input"
+                    />
+                  )}
                 </div>
                 <button
                   type="submit"
-                  disabled={scanning || !domain.trim()}
+                  disabled={scanning || (inputMode === 'domain' ? !domain.trim() : !businessName.trim())}
                   className="btn-primary text-sm px-5 py-3 rounded-xl"
+                  id="scan-submit-btn"
                 >
                   {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   {scanning ? 'Scanning...' : 'Scan Now'}
                 </button>
               </div>
+
+              {/* Lookup status */}
+              {lookupStatus && !error && (
+                <p className="mt-3 text-green-600 text-sm text-center font-medium">{lookupStatus}</p>
+              )}
+              {lookupError && (
+                <p className="mt-3 text-red-600 text-sm text-center">{lookupError}</p>
+              )}
 
               {/* Live progress */}
               {scanning && (

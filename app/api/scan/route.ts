@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runScan } from '@/lib/scanner';
-import { execute, query } from '@/lib/db';
+import { execute, query, queryOne } from '@/lib/db';
 import { Finding } from '@/types/scan';
 
 export const dynamic = 'force-dynamic';
@@ -82,10 +82,17 @@ export async function POST(req: NextRequest) {
     // Run the scan
     const result = await runScan(domain);
 
+    // Look up previous scan for this domain
+    const prevScan = await queryOne(
+      'SELECT id FROM scans WHERE domain = $1 AND status = $2 ORDER BY created_at DESC LIMIT 1',
+      [domain, 'complete']
+    );
+    const previousScanId = prevScan?.id || null;
+
     // Save to database
     await execute(
-      'INSERT INTO scans (id, domain, score, status, ip_address, duration_ms, completed_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-      [result.id, domain, result.score, 'complete', ip, result.duration_ms || null]
+      'INSERT INTO scans (id, domain, score, status, ip_address, duration_ms, previous_scan_id, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
+      [result.id, domain, result.score, 'complete', ip, result.duration_ms || null, previousScanId]
     );
 
     // Save step logs

@@ -47,6 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       summary,
       created_at: scan.created_at,
       completed_at: scan.completed_at,
+      previous_scan_id: scan.previous_scan_id || null,
     };
 
     return NextResponse.json({ result });
@@ -91,6 +92,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         id: scan.id, domain: scan.domain, score: scan.score,
         status: scan.status, findings, summary,
         created_at: scan.created_at, completed_at: scan.completed_at,
+        previous_scan_id: scan.previous_scan_id || null,
       };
 
       // Send email and await to prevent serverless container shutdown before complete
