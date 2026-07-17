@@ -159,7 +159,7 @@ export default function HomePage() {
               What we check
             </h2>
             <p className="text-gray-500 text-center text-sm mb-10">
-              7 automated security checks — results in plain Ghanaian business language, not technical jargon.
+              {CHECKS_DISPLAY.length} automated security checks — results in plain Ghanaian business language, not technical jargon.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {CHECKS_DISPLAY.map(({ icon: Icon, label }) => (
