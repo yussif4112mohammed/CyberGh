@@ -26,17 +26,15 @@ export async function checkPaths(domain: string): Promise<Finding[]> {
   const base = `https://${domain}`;
 
   const checks = SENSITIVE_PATHS.map(async (check) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-
       const res = await fetch(`${base}${check.path}`, {
         method: 'GET',
         redirect: 'manual',
         signal: controller.signal,
         headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cybergh.app)' },
       });
-      clearTimeout(timeout);
 
       // 200 = exposed, 403 = exists but blocked (still worth flagging for some), 404 = not found
       if (res.status === 200) {
@@ -45,6 +43,8 @@ export async function checkPaths(domain: string): Promise<Finding[]> {
       return null;
     } catch {
       return null; // timeout or network error on this path — skip it
+    } finally {
+      clearTimeout(timeout);
     }
   });
 

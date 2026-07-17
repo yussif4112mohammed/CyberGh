@@ -3,10 +3,10 @@ import { Finding } from '@/types/scan';
 export async function checkBreach(domain: string): Promise<Finding[]> {
   const findings: Finding[] = [];
 
-  try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 8000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
+  try {
     // HaveIBeenPwned domain search API — checks if any emails from this domain
     // have appeared in known data breaches
     const res = await fetch(
@@ -67,6 +67,8 @@ export async function checkBreach(domain: string): Promise<Finding[]> {
       description: 'We could not reach the breach database during this scan.',
       fix: 'Check manually at haveibeenpwned.com/domain-search',
     });
+  } finally {
+    clearTimeout(timeout);
   }
 
   return findings;

@@ -93,8 +93,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         created_at: scan.created_at, completed_at: scan.completed_at,
       };
 
-      // Send email in background — don't block the response
-      sendReportEmail(email.toLowerCase(), result, params.id);
+      // Send email and await to prevent serverless container shutdown before complete
+      await sendReportEmail(email.toLowerCase(), result, params.id);
     }
 
     return NextResponse.json({ success: true });

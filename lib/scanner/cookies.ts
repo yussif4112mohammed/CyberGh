@@ -3,9 +3,10 @@ import { Finding } from '@/types/scan';
 export async function checkCookies(domain: string): Promise<Finding[]> {
   const findings: Finding[] = [];
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+
   try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 6000);
 
     const res = await fetch(`https://${domain}`, {
       method: 'GET',
@@ -88,6 +89,8 @@ export async function checkCookies(domain: string): Promise<Finding[]> {
 
   } catch {
     // Skip silently — cookie check is supplementary
+  } finally {
+    clearTimeout(timeout);
   }
 
   return findings;

@@ -68,17 +68,16 @@ const HEADER_CHECKS: HeaderCheck[] = [
 export async function checkHeaders(domain: string): Promise<Finding[]> {
   const findings: Finding[] = [];
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
+  try {
     const res = await fetch(`https://${domain}`, {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
       headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cybergh.app)' },
     });
-    clearTimeout(timeout);
 
     const headers = res.headers;
 
@@ -162,6 +161,8 @@ export async function checkHeaders(domain: string): Promise<Finding[]> {
         evidence: err.message,
       });
     }
+  } finally {
+    clearTimeout(timeout);
   }
 
   return findings;
