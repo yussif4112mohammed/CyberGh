@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
@@ -117,6 +117,45 @@ export default function CompliancePage() {
   const [answers, setAnswers] = useState<Record<string, boolean | null>>({});
   const [submitted, setSubmitted] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [scanDomain, setScanDomain] = useState('');
+  const [prefilled, setPrefilled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const scanId = params.get('scanId');
+    if (!scanId) return;
+
+    fetch(`/api/scan/${scanId}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.result) {
+          const result = data.result;
+          setScanDomain(result.domain);
+          setPrefilled(true);
+
+          const newAnswers: Record<string, boolean | null> = {};
+
+          // cisd1 (HTTPS/SSL)
+          const sslFailed = result.findings.some((f: any) => f.category === 'ssl' && f.severity !== 'pass' && f.severity !== 'info');
+          newAnswers['cisd1'] = !sslFailed;
+
+          // cisd3 (Email Security / SPF / DMARC)
+          const dnsFailed = result.findings.some((f: any) => f.category === 'dns' && f.severity !== 'pass' && f.severity !== 'info');
+          newAnswers['cisd3'] = !dnsFailed;
+
+          // cisd7 (Directory Listing & Access Controls)
+          const dirListingFailed = result.findings.some((f: any) => 
+            (f.category === 'directory' || f.category === 'paths' || f.category === 'wordpress') && 
+            f.severity !== 'pass' && f.severity !== 'info' && f.severity !== 'low'
+          );
+          newAnswers['cisd7'] = !dirListingFailed;
+
+          setAnswers(prev => ({ ...prev, ...newAnswers }));
+        }
+      })
+      .catch(err => console.error('Failed to load pre-fill scan:', err));
+  }, []);
 
   const answer = (id: string, value: boolean) => {
     setAnswers(prev => ({ ...prev, [id]: value }));
@@ -152,6 +191,19 @@ export default function CompliancePage() {
               stands against Ghana's cybersecurity regulations — and what to fix first.
             </p>
           </div>
+
+          {/* Pre-fill Banner */}
+          {prefilled && (
+            <div className="card p-5 mb-6 bg-blue-50 border-blue-100 border-l-4 border-l-blue-500 flex items-start gap-3">
+              <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-blue-950 text-sm">Answers Pre-filled</h3>
+                <p className="text-xs text-blue-800 mt-0.5">
+                  We've pre-filled some answers automatically based on the website security scan of <strong>{scanDomain}</strong>. You can manually change any answer if needed.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Progress */}
           <div className="card p-5 mb-6">

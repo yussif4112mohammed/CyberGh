@@ -13,6 +13,13 @@ export interface Finding {
   evidence?: string;
 }
 
+export interface ScanLog {
+  step_name: string;
+  status: 'success' | 'failed';
+  duration_ms: number;
+  error_msg?: string;
+}
+
 export interface ScanResult {
   id: string;
   domain: string;
@@ -29,4 +36,7 @@ export interface ScanResult {
   };
   created_at: string;
   completed_at?: string;
+  duration_ms?: number;
+  ip_address?: string;
+  logs?: ScanLog[];
 }

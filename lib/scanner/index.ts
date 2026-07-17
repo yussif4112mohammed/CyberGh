@@ -57,17 +57,55 @@ export const CHECKS: { name: CheckName; label: string }[] = [
   { name: 'directory', label: 'Directory Listing' },
 ];
 
+interface LogItem {
+  step_name: string;
+  status: 'success' | 'failed';
+  duration_ms: number;
+  error_msg?: string;
+}
+
+async function runTimedCheck(
+  name: string,
+  checkFn: () => Promise<Finding[]>
+): Promise<{ findings: Finding[]; log: LogItem }> {
+  const start = Date.now();
+  try {
+    const findings = await checkFn();
+    return {
+      findings,
+      log: {
+        step_name: name,
+        status: 'success',
+        duration_ms: Date.now() - start,
+      },
+    };
+  } catch (err: any) {
+    return {
+      findings: [],
+      log: {
+        step_name: name,
+        status: 'failed',
+        duration_ms: Date.now() - start,
+        error_msg: err?.message || String(err),
+      },
+    };
+  }
+}
+
 export async function runScan(
   domain: string,
   onProgress?: (check: CheckName) => void
 ): Promise<ScanResult> {
+  const overallStart = Date.now();
   const scanId = uuid();
   const findings: Finding[] = [];
+  const logs: LogItem[] = [];
 
-  // Run checks: SSL first (needed for others), then parallelise the rest
+  // Run checks: SSL first (needed for others)
   onProgress?.('ssl');
-  const sslFindings = await checkSSL(domain);
-  findings.push(...sslFindings);
+  const sslResult = await runTimedCheck('ssl', () => checkSSL(domain));
+  findings.push(...sslResult.findings);
+  logs.push(sslResult.log);
 
   // Run remaining checks in parallel for speed
   onProgress?.('headers');
@@ -81,20 +119,24 @@ export async function runScan(
   onProgress?.('subdomain');
   onProgress?.('directory');
 
-  const [headerF, pathF, dnsF, portF, cookieF, breachF, wpF, redirectF, subdomainF, directoryF] = await Promise.all([
-    checkHeaders(domain),
-    checkPaths(domain),
-    checkDNS(domain),
-    checkPorts(domain),
-    checkCookies(domain),
-    checkBreach(domain),
-    checkWordPress(domain),
-    checkHttpRedirect(domain),
-    checkSubdomains(domain),
-    checkDirectoryListing(domain),
-  ]);
+  const parallelChecks = [
+    runTimedCheck('headers', () => checkHeaders(domain)),
+    runTimedCheck('paths', () => checkPaths(domain)),
+    runTimedCheck('dns', () => checkDNS(domain)),
+    runTimedCheck('ports', () => checkPorts(domain)),
+    runTimedCheck('cookies', () => checkCookies(domain)),
+    runTimedCheck('breach', () => checkBreach(domain)),
+    runTimedCheck('wordpress', () => checkWordPress(domain)),
+    runTimedCheck('redirect', () => checkHttpRedirect(domain)),
+    runTimedCheck('subdomain', () => checkSubdomains(domain)),
+    runTimedCheck('directory', () => checkDirectoryListing(domain)),
+  ];
 
-  findings.push(...headerF, ...pathF, ...dnsF, ...portF, ...cookieF, ...breachF, ...wpF, ...redirectF, ...subdomainF, ...directoryF);
+  const results = await Promise.all(parallelChecks);
+  for (const r of results) {
+    findings.push(...r.findings);
+    logs.push(r.log);
+  }
 
   // Sort: critical first, passes last
   const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, info: 4, pass: 5 };
@@ -103,6 +145,7 @@ export async function runScan(
   const score = calculateScore(findings);
   const summary = summarise(findings);
   const now = new Date().toISOString();
+  const overallDuration = Date.now() - overallStart;
 
   return {
     id: scanId,
@@ -113,5 +156,7 @@ export async function runScan(
     summary,
     created_at: now,
     completed_at: now,
+    duration_ms: overallDuration,
+    logs,
   };
 }

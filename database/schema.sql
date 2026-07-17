@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS scans (
   score        SMALLINT      NULL,
   status       VARCHAR(20)   NOT NULL DEFAULT 'pending'
                              CHECK (status IN ('pending','running','complete','failed')),
+  ip_address   VARCHAR(45)   NULL,
+  duration_ms  INTEGER       NULL,
   created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ   NULL
 );
@@ -33,6 +35,19 @@ CREATE TABLE IF NOT EXISTS findings (
 
 CREATE INDEX IF NOT EXISTS idx_findings_scan_id  ON findings(scan_id);
 CREATE INDEX IF NOT EXISTS idx_findings_severity ON findings(severity);
+
+-- ── Scan Logs ──────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS scan_logs (
+  id          SERIAL        PRIMARY KEY,
+  scan_id     VARCHAR(36)   NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+  step_name   VARCHAR(64)   NOT NULL,
+  status      VARCHAR(20)   NOT NULL,
+  duration_ms INTEGER       NULL,
+  error_msg   TEXT          NULL,
+  created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scan_logs_scan_id ON scan_logs(scan_id);
 
 -- ── Users ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (

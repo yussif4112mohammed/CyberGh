@@ -84,9 +84,21 @@ export async function POST(req: NextRequest) {
 
     // Save to database
     await execute(
-      'INSERT INTO scans (id, domain, score, status, completed_at) VALUES (?, ?, ?, ?, NOW())',
-      [result.id, domain, result.score, 'complete']
+      'INSERT INTO scans (id, domain, score, status, ip_address, duration_ms, completed_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+      [result.id, domain, result.score, 'complete', ip, result.duration_ms || null]
     );
+
+    // Save step logs
+    if (result.logs && result.logs.length > 0) {
+      const logValues = result.logs.map(() => '(?,?,?,?,?)').join(',');
+      const logParams = result.logs.flatMap((log: any) => [
+        result.id, log.step_name, log.status, log.duration_ms, log.error_msg || null
+      ]);
+      await execute(
+        `INSERT INTO scan_logs (scan_id, step_name, status, duration_ms, error_msg) VALUES ${logValues}`,
+        logParams
+      );
+    }
 
     if (result.findings.length > 0) {
       const values = result.findings.map(() => '(?,?,?,?,?,?,?)').join(',');

@@ -15,7 +15,7 @@ const PLANS = [
     ctaStyle: 'btn-outline',
     features: [
       'One-time website security scan',
-      '7-point security check',
+      '10-point security check',
       'Plain-language findings report',
       'Fix instructions for every issue',
       'Ghana compliance score',
@@ -106,7 +106,7 @@ export default function PricingPage() {
           {/* Plans */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {PLANS.map(plan => (
-              <div key={plan.name} className={`card p-6 border-2 ${plan.color} relative`}>
+              <div key={plan.name} className={`card p-6 border-2 ${plan.color} relative hover:scale-[1.02] hover:shadow-card-hover transition-all duration-300`}>
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-ghana-red text-white text-xs font-bold px-3 py-1 rounded-full">
