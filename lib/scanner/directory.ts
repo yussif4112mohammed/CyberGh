@@ -37,10 +37,10 @@ function hasDirectoryListing(html: string): boolean {
 }
 
 async function checkDirectory(base: string, path: string): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 5000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
 
+  try {
     const res = await fetch(`${base}${path}`, {
       method: 'GET',
       redirect: 'follow',
@@ -56,6 +56,8 @@ async function checkDirectory(base: string, path: string): Promise<boolean> {
     return hasDirectoryListing(text);
   } catch {
     return false;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

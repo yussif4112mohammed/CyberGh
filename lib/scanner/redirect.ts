@@ -2,11 +2,12 @@ import { Finding } from '@/types/scan';
 
 export async function checkHttpRedirect(domain: string): Promise<Finding[]> {
   const findings: Finding[] = [];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  const httpsController = new AbortController();
+  const httpsTimeout = setTimeout(() => httpsController.abort(), 8000);
 
   try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 8000);
-
     // Try connecting over plain HTTP and see if it redirects to HTTPS
     const res = await fetch(`http://${domain}`, {
       method: 'GET',
@@ -54,9 +55,6 @@ export async function checkHttpRedirect(domain: string): Promise<Finding[]> {
 
     // ── Mixed content check ──────────────────────────────────
     // Fetch the HTTPS version and scan for HTTP resources
-    const httpsController = new AbortController();
-    setTimeout(() => httpsController.abort(), 8000);
-
     const httpsRes = await fetch(`https://${domain}`, {
       method: 'GET',
       redirect: 'follow',
@@ -115,6 +113,9 @@ export async function checkHttpRedirect(domain: string): Promise<Finding[]> {
         evidence: err.message,
       });
     }
+  } finally {
+    clearTimeout(timeout);
+    clearTimeout(httpsTimeout);
   }
 
   return findings;

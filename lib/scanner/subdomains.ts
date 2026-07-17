@@ -56,7 +56,7 @@ async function checkSubdomainTakeover(subdomain: string, domain: string): Promis
 
     // Try to fetch the subdomain and look for the takeover signature
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
     try {
       const res = await fetch(`https://${hostname}`, {
@@ -71,6 +71,8 @@ async function checkSubdomainTakeover(subdomain: string, domain: string): Promis
       }
     } catch {
       // Can't reach the subdomain — might still be vulnerable but can't confirm
+    } finally {
+      clearTimeout(timeout);
     }
 
     return null;
