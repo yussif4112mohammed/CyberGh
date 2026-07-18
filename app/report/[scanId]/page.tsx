@@ -330,18 +330,18 @@ export default function ReportPage() {
             );
           })()}
 
-          {/* ── Teaser findings (always visible) ── */}
+          {/* ── Teaser findings (screen only, hidden when printing) ── */}
           {!showFullReport && (
             <>
-              <h2 className="font-display font-bold text-xl text-navy-950 mb-4">
+              <h2 className="font-display font-bold text-xl text-navy-950 mb-4 print:hidden">
                 Top issues found ({teaserFindings.length} of {result.findings.filter(f => f.severity !== 'pass').length} shown)
               </h2>
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 print:hidden">
                 {teaserFindings.map((f, i) => <FindingCard key={i} finding={f} index={i} />)}
               </div>
 
-              {/* ── Email gate ── */}
-              <div className="card p-8 text-center mb-6 border-2 border-dashed border-navy-200">
+              {/* ── Email gate — hidden when printing ── */}
+              <div className="card p-8 text-center mb-6 border-2 border-dashed border-navy-200 print:hidden">
                 <Mail className="w-10 h-10 text-navy-700 mx-auto mb-3" />
                 <h3 className="font-display font-bold text-xl text-navy-950 mb-2">
                   See your full security report
@@ -362,6 +362,16 @@ export default function ReportPage() {
                 </form>
                 <p className="text-xs text-gray-400 mt-3">No spam. We'll send you the report and one follow-up.</p>
               </div>
+
+              {/* ── Print-only: show ALL findings in PDF even without email unlock ── */}
+              <div className="hidden print:block">
+                <h2 className="font-display font-bold text-xl text-navy-950 mb-4">
+                  All findings ({result.findings.length})
+                </h2>
+                <div className="space-y-3 mb-8">
+                  {allFindings.map((f, i) => <FindingCard key={i} finding={f} index={i} />)}
+                </div>
+              </div>
             </>
           )}
 
@@ -369,7 +379,7 @@ export default function ReportPage() {
           {showFullReport && (
             <>
               {emailSaved && (
-                <div className="card p-4 mb-6 bg-green-50 border-green-100 flex items-center gap-3">
+                <div className="card p-4 mb-6 bg-green-50 border-green-100 flex items-center gap-3 print:hidden">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <p className="text-sm text-green-800">Report sent to <strong>{email}</strong> — check your inbox.</p>
                 </div>
