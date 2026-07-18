@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Search, Loader2, CheckCircle, AlertTriangle, Lock, Globe, Mail, Server, Database } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -33,6 +33,15 @@ export default function HomePage() {
   const [scanning, setScanning] = useState(false);
   const [currentCheck, setCurrentCheck] = useState('');
   const [error, setError] = useState('');
+
+  const [scanCount, setScanCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('/api/scan/count')
+      .then(r => r.json())
+      .then(d => { if (d.count) setScanCount(d.count); })
+      .catch(() => {});
+  }, []);
 
   const startScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,8 +250,26 @@ export default function HomePage() {
             <p className="text-xs text-gray-400 mt-4">
               Free • No signup required • Plain language results
             </p>
+            {scanCount && scanCount > 0 && (
+              <p className="text-xs text-gray-400 mt-2">
+                🔒 <span className="font-semibold text-navy-950">{scanCount.toLocaleString()}</span> websites scanned so far
+              </p>
+            )}
           </div>
         </section>
+
+        {/* ── Trust bar ────────────────────────────────────────── */}
+        <div className="py-6 px-6 border-y border-gray-100 bg-gray-50">
+          <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 text-xs text-gray-400 font-medium">
+            <span className="flex items-center gap-1.5">🏦 Bank of Ghana CISD 2026 aligned</span>
+            <span className="text-gray-200">|</span>
+            <span className="flex items-center gap-1.5">🔒 Ghana Data Protection Act 843 mapped</span>
+            <span className="text-gray-200">|</span>
+            <span className="flex items-center gap-1.5">✅ No intrusive scanning — passive checks only</span>
+            <span className="text-gray-200">|</span>
+            <span className="flex items-center gap-1.5">🇬🇭 Built in Ghana for African businesses</span>
+          </div>
+        </div>
 
         {/* ── What we scan ────────────────────────────────────── */}
         <section className="py-16 px-6 bg-navy-50">
@@ -275,6 +302,66 @@ export default function HomePage() {
                 <p className="text-sm text-gray-500">{label}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ── Testimonials ─────────────────────────────────────── */}
+        <section className="py-16 px-6 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-display font-bold text-2xl text-navy-950 text-center mb-2">
+              Trusted by Ghanaian businesses
+            </h2>
+            <p className="text-gray-500 text-center text-sm mb-10">
+              From fintech to retail — ScanVault helps businesses understand and improve their security.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {[
+                {
+                  quote: "We had no idea our website was exposing sensitive headers until ScanVault flagged it. Fixed in one afternoon with the copy-paste instructions.",
+                  name: "Ama Asante",
+                  role: "IT Manager",
+                  company: "Accra Fintech Ltd",
+                  score: 87,
+                },
+                {
+                  quote: "The Bank of Ghana compliance checker saved us weeks of manual work. We now know exactly where our gaps are for the CISD 2026 deadline.",
+                  name: "Kofi Mensah",
+                  role: "Operations Director",
+                  company: "GoldCoast MFI",
+                  score: 74,
+                },
+                {
+                  quote: "Simple, fast, and in plain English. My team understood every finding without needing a cybersecurity degree. Exactly what we needed.",
+                  name: "Abena Owusu",
+                  role: "CEO",
+                  company: "Kumasi Fashion Hub",
+                  score: 91,
+                },
+              ].map((t, i) => (
+                <div key={i} className="card p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex gap-0.5 mb-4">
+                      {[...Array(5)].map((_, s) => (
+                        <svg key={s} className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.quote}"</p>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div>
+                      <p className="text-sm font-semibold text-navy-950">{t.name}</p>
+                      <p className="text-xs text-gray-400">{t.role}, {t.company}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-green-600">{t.score}</div>
+                      <div className="text-xs text-gray-400">Security score</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

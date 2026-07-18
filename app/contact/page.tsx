@@ -19,16 +19,30 @@ export default function ContactPage() {
   });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState('');
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
-    const subject = encodeURIComponent(`ScanVault Enquiry — ${form.service || 'General'} — ${form.business}`);
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nBusiness: ${form.business}\nService: ${form.service}\n\nMessage:\n${form.message}`
-    );
-    window.location.href = `mailto:hello@scanvault.app?subject=${subject}&body=${body}`;
-    setTimeout(() => { setSending(false); setSent(true); }, 600);
+    setSendError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSendError(data.error || 'Failed to send. Please email hello@scanvault.app directly.');
+        setSending(false);
+        return;
+      }
+      setSent(true);
+    } catch {
+      setSendError('Could not connect. Please email hello@scanvault.app directly.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -67,10 +81,7 @@ export default function ContactPage() {
               <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
               <h2 className="font-display font-bold text-xl text-navy-950 mb-2">Message sent!</h2>
               <p className="text-gray-500 text-sm">
-                Your email app should have opened. We'll get back to you within 24 hours.
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                Didn't open? Email us directly at hello@scanvault.app
+                Your message has been sent! We'll get back to you within 24 hours. Check your inbox for a confirmation email.
               </p>
             </div>
           ) : (
@@ -116,6 +127,9 @@ export default function ContactPage() {
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Send Message
               </button>
+              {sendError && (
+                <p className="text-red-600 text-sm text-center">{sendError}</p>
+              )}
               <p className="text-xs text-gray-400 text-center">
                 Free consultation — no commitment, no sales pressure.
               </p>
