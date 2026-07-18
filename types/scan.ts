@@ -39,5 +39,6 @@ export interface ScanResult {
   duration_ms?: number;
   ip_address?: string;
   previous_scan_id?: string | null;
+  user_id?: number | null;
   logs?: ScanLog[];
 }

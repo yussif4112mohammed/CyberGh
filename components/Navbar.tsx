@@ -1,9 +1,46 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+interface User {
+  id: number;
+  email: string;
+  name: string | null;
+  company: string | null;
+  plan: string;
+}
 
 export default function Navbar() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(data => {
+        if (data.user) setUser(data.user);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        setUser(null);
+        router.push('/login');
+        router.refresh();
+      }
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-navy-100">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-navy-100 print:hidden">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-9 h-9 bg-navy-950 rounded-xl flex items-center justify-center flex-shrink-0 relative overflow-hidden">
@@ -22,12 +59,34 @@ export default function Navbar() {
           <Link href="/compliance" className="text-sm text-gray-600 hover:text-navy-950 transition-colors hidden sm:block">
             Compliance Checker
           </Link>
-          <Link href="/pricing" className="text-sm text-gray-600 hover:text-navy-950 transition-colors hidden sm:block">
-            Pricing
-          </Link>
-          <Link href="/" className="btn-primary text-sm py-2 px-4">
-            Free Scan
-          </Link>
+          
+          {!loading && user ? (
+            <>
+              <Link href="/dashboard" className="text-sm font-semibold text-navy-950 hover:text-navy-700 transition-colors">
+                Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/pricing" className="text-sm text-gray-600 hover:text-navy-950 transition-colors hidden sm:block">
+                Pricing
+              </Link>
+              {!loading && (
+                <Link href="/login" className="text-sm text-navy-950 hover:text-navy-700 font-medium transition-colors">
+                  Login
+                </Link>
+              )}
+              <Link href="/" className="btn-primary text-sm py-2 px-4">
+                Free Scan
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

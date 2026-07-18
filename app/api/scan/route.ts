@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 import { runScan } from '@/lib/scanner';
 import { execute, query, queryOne } from '@/lib/db';
 import { Finding } from '@/types/scan';
@@ -82,6 +84,20 @@ export async function POST(req: NextRequest) {
     // Run the scan
     const result = await runScan(domain);
 
+    // Extract user session if logged in
+    let userId: number | null = null;
+    try {
+      const sessionCookie = cookies().get('session')?.value;
+      if (sessionCookie) {
+        const decoded = jwt.verify(sessionCookie, process.env.JWT_SECRET || 'scanvault_fallback_secret_key_123') as any;
+        if (decoded && decoded.userId) {
+          userId = decoded.userId;
+        }
+      }
+    } catch (e) {
+      // Ignore invalid session token, proceed as guest
+    }
+
     // Look up previous scan for this domain
     const prevScan = await queryOne(
       'SELECT id FROM scans WHERE domain = $1 AND status = $2 ORDER BY created_at DESC LIMIT 1',
@@ -91,8 +107,8 @@ export async function POST(req: NextRequest) {
 
     // Save to database
     await execute(
-      'INSERT INTO scans (id, domain, score, status, ip_address, duration_ms, previous_scan_id, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
-      [result.id, domain, result.score, 'complete', ip, result.duration_ms || null, previousScanId]
+      'INSERT INTO scans (id, domain, score, status, ip_address, duration_ms, previous_scan_id, user_id, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+      [result.id, domain, result.score, 'complete', ip, result.duration_ms || null, previousScanId, userId]
     );
 
     // Save step logs

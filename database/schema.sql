@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS scans (
   ip_address   VARCHAR(45)   NULL,
   duration_ms  INTEGER       NULL,
   previous_scan_id VARCHAR(36) NULL,
+  user_id      INTEGER       NULL REFERENCES users(id) ON DELETE SET NULL,
   created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ   NULL
 );
