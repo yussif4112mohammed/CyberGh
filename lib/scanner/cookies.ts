@@ -12,7 +12,7 @@ export async function checkCookies(domain: string): Promise<Finding[]> {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cybergh.app)' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
     });
 
     // Next.js and other frameworks use getSetCookie — headers.raw() not available in all envs

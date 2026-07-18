@@ -23,7 +23,7 @@ async function safeFetch(url: string, timeout = 5000): Promise<Response | null> 
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cyber-gh.vercel.app)' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
     });
   } catch {
     return null;
@@ -269,7 +269,7 @@ export async function checkWordPress(domain: string): Promise<Finding[]> {
     const authorRes = await fetch(`${base}/?author=1`, {
       method: 'GET',
       redirect: 'manual',
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cyber-gh.vercel.app)' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
     });
     const location = authorRes.headers.get('location');
     if ((authorRes.status === 301 || authorRes.status === 302) && location && location.includes('/author/')) {

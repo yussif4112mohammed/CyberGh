@@ -11,8 +11,8 @@ export default function TermsPage() {
 
           <div className="card p-8 space-y-6 text-gray-700 text-sm leading-relaxed">
             <section>
-              <h2 className="text-lg font-semibold text-navy-950 mb-2">1. What CyberGH does</h2>
-              <p>CyberGH provides automated website security scanning, compliance checklists, and cybersecurity advisory services for businesses in Ghana and Africa. Our scanner performs passive, non-intrusive checks using publicly available information.</p>
+              <h2 className="text-lg font-semibold text-navy-950 mb-2">1. What ScanVault does</h2>
+              <p>ScanVault provides automated website security scanning, compliance checklists, and cybersecurity advisory services for businesses in Ghana and Africa. Our scanner performs passive, non-intrusive checks using publicly available information.</p>
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">2. Authorized use only</h2>
@@ -24,7 +24,7 @@ export default function TermsPage() {
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">4. Limitation of liability</h2>
-              <p>CyberGH is not liable for any security incidents, data breaches, or regulatory penalties that occur while using or after using our service. Our reports are advisory in nature — you remain responsible for the security of your own systems.</p>
+              <p>ScanVault is not liable for any security incidents, data breaches, or regulatory penalties that occur while using or after using our service. Our reports are advisory in nature — you remain responsible for the security of your own systems.</p>
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">5. Fair use</h2>
@@ -36,7 +36,7 @@ export default function TermsPage() {
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">7. Contact</h2>
-              <p>Questions? Email hello@cybergh.app or visit our <a href="/contact" className="text-navy-700 underline">contact page</a>.</p>
+              <p>Questions? Email hello@scanvault.app or visit our <a href="/contact" className="text-navy-700 underline">contact page</a>.</p>
             </section>
           </div>
         </div>

@@ -228,7 +228,7 @@ function buildReportEmail(result: ScanResult, reportUrl: string): string {
               text-align: center;
             ">
               <div style="color: #94A3B8; font-size: 12px; line-height: 1.6;">
-                You received this because you requested a security scan on CyberGH.<br>
+                You received this because you requested a security scan on ScanVault.<br>
                 <a href="https://cyber-gh.vercel.app" style="color: #0A1628; text-decoration: none; font-weight: 600;">cyber-gh.vercel.app</a>
                 &nbsp;·&nbsp;
                 <a href="https://cyber-gh.vercel.app/privacy" style="color: #94A3B8; text-decoration: none;">Privacy Policy</a>
@@ -266,7 +266,7 @@ export async function sendReportEmail(
       : email;
 
     await resend.emails.send({
-      from: 'CyberGH <onboarding@resend.dev>',
+      from: 'ScanVault <onboarding@resend.dev>',
       to: toEmail,
       subject: `Your security report for ${result.domain} — Score: ${result.score}/100 (${scoreLabel})`,
       html: buildReportEmail(result, reportUrl),

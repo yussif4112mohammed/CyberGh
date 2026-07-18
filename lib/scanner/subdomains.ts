@@ -61,7 +61,7 @@ async function checkSubdomainTakeover(subdomain: string, domain: string): Promis
     try {
       const res = await fetch(`https://${hostname}`, {
         signal: controller.signal,
-        headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cyber-gh.vercel.app)' },
+        headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
       });
       const text = await res.text();
       const signature = TAKEOVER_SIGNATURES[matchedService].toLowerCase();

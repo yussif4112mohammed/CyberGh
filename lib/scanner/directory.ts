@@ -46,7 +46,7 @@ async function checkDirectory(base: string, path: string): Promise<boolean> {
       redirect: 'follow',
       signal: controller.signal,
       headers: {
-        'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cyber-gh.vercel.app)',
+        'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)',
       },
     });
 

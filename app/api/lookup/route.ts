@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     // Fallback: DuckDuckGo Instant Answer API (no key needed)
     const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query + ' Ghana')}&format=json&no_html=1`;
     const ddgRes = await fetch(ddgUrl, {
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0' },
     });
     const ddgData = await ddgRes.json();
     

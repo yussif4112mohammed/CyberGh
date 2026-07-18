@@ -33,7 +33,7 @@ export async function checkPaths(domain: string): Promise<Finding[]> {
         method: 'GET',
         redirect: 'manual',
         signal: controller.signal,
-        headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cybergh.app)' },
+        headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
       });
 
       // 200 = exposed, 403 = exists but blocked (still worth flagging for some), 404 = not found

@@ -11,7 +11,7 @@ export async function checkFingerprint(domain: string): Promise<Finding[]> {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cybergh.app)' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
     });
     
     const headers = res.headers;

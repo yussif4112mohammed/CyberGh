@@ -13,7 +13,7 @@ export async function checkBreach(domain: string): Promise<Finding[]> {
       `https://haveibeenpwned.com/api/v3/breacheddomain/${encodeURIComponent(domain)}`,
       {
         headers: {
-          'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cybergh.app)',
+          'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)',
           'hibp-api-key': process.env.HIBP_API_KEY || '',
         },
         signal: controller.signal,

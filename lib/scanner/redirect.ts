@@ -13,7 +13,7 @@ export async function checkHttpRedirect(domain: string): Promise<Finding[]> {
       method: 'GET',
       redirect: 'manual', // Don't follow redirects — we want to see what happens
       signal: controller.signal,
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cyber-gh.vercel.app)' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
     });
 
     const location = res.headers.get('location') || '';
@@ -59,7 +59,7 @@ export async function checkHttpRedirect(domain: string): Promise<Finding[]> {
       method: 'GET',
       redirect: 'follow',
       signal: httpsController.signal,
-      headers: { 'User-Agent': 'CyberGH-Scanner/1.0 (security-audit; +https://cyber-gh.vercel.app)' },
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0 (security-audit; +https://scanvault.app)' },
     });
 
     const html = await httpsRes.text();

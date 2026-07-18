@@ -23,11 +23,11 @@ export default function ContactPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
-    const subject = encodeURIComponent(`CyberGH Enquiry — ${form.service || 'General'} — ${form.business}`);
+    const subject = encodeURIComponent(`ScanVault Enquiry — ${form.service || 'General'} — ${form.business}`);
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nBusiness: ${form.business}\nService: ${form.service}\n\nMessage:\n${form.message}`
     );
-    window.location.href = `mailto:hello@cybergh.app?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:hello@scanvault.app?subject=${subject}&body=${body}`;
     setTimeout(() => { setSending(false); setSent(true); }, 600);
   };
 
@@ -50,7 +50,7 @@ export default function ContactPage() {
           {/* Contact methods */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[
-              { icon: Mail, label: 'Email', value: 'hello@cybergh.app' },
+              { icon: Mail, label: 'Email', value: 'hello@scanvault.app' },
               { icon: Phone, label: 'Call/WhatsApp', value: '+233 XX XXX XXXX' },
               { icon: MessageCircle, label: 'Response time', value: 'Within 24 hours' },
             ].map(item => (
@@ -70,7 +70,7 @@ export default function ContactPage() {
                 Your email app should have opened. We'll get back to you within 24 hours.
               </p>
               <p className="text-xs text-gray-400 mt-2">
-                Didn't open? Email us directly at hello@cybergh.app
+                Didn't open? Email us directly at hello@scanvault.app
               </p>
             </div>
           ) : (

@@ -304,7 +304,7 @@ export default function HomePage() {
               <div className="w-6 h-6 bg-navy-950 rounded flex items-center justify-center">
                 <Shield className="w-3 h-3 text-white" />
               </div>
-              <span className="font-semibold text-navy-950">CyberGH</span>
+              <span className="font-semibold text-navy-950">ScanVault</span>
             </div>
             <p>Made in Ghana 🇬🇭 — Securing African businesses</p>
             <div className="flex gap-4">

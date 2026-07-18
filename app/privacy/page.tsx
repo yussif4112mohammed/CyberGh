@@ -25,7 +25,7 @@ export default function PrivacyPage() {
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">4. Your rights under Ghana's Data Protection Act 843</h2>
-              <p>You have the right to access, correct, or request deletion of any personal data we hold about you. To exercise these rights, email us at hello@cybergh.app with the subject line "Data Request." We will respond within 21 business days.</p>
+              <p>You have the right to access, correct, or request deletion of any personal data we hold about you. To exercise these rights, email us at hello@scanvault.app with the subject line "Data Request." We will respond within 21 business days.</p>
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">5. Scanning third-party websites</h2>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
             </section>
             <section>
               <h2 className="text-lg font-semibold text-navy-950 mb-2">6. Contact</h2>
-              <p>Privacy questions? Email hello@cybergh.app or visit our <a href="/contact" className="text-navy-700 underline">contact page</a>.</p>
+              <p>Privacy questions? Email hello@scanvault.app or visit our <a href="/contact" className="text-navy-700 underline">contact page</a>.</p>
             </section>
           </div>
         </div>

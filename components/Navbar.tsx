@@ -15,7 +15,7 @@ export default function Navbar() {
             </svg>
           </div>
           <span className="font-display font-bold text-xl text-navy-950 tracking-tight leading-none">
-            Cyber<span className="text-ghana-red">GH</span>
+            Scan<span className="text-ghana-red">Vault</span>
           </span>
         </Link>
         <div className="flex items-center gap-6">
