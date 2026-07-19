@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     locale: 'en_GH',
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
