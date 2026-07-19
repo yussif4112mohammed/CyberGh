@@ -78,3 +78,22 @@ CREATE TABLE IF NOT EXISTS monitored_domains (
 
 CREATE INDEX IF NOT EXISTS idx_monitored_domains_user_id ON monitored_domains(user_id);
 
+-- ── Visitor Logs ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS visitor_logs (
+  id           SERIAL        PRIMARY KEY,
+  ip_address   VARCHAR(45)   NULL,
+  user_id      INTEGER       NULL REFERENCES users(id) ON DELETE SET NULL,
+  path         VARCHAR(255)  NOT NULL,
+  action       VARCHAR(64)   NOT NULL,
+  metadata     JSONB         NULL,
+  country      VARCHAR(10)   NULL,
+  region       VARCHAR(50)   NULL,
+  city         VARCHAR(100)  NULL,
+  user_agent   TEXT          NULL,
+  created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_visitor_logs_created_at ON visitor_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_visitor_logs_user_id ON visitor_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_visitor_logs_action ON visitor_logs(action);
+
