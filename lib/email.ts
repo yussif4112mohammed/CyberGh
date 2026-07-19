@@ -278,3 +278,141 @@ export async function sendReportEmail(
     return false;
   }
 }
+
+export async function sendMonitoringAlertEmail(
+  email: string,
+  domain: string,
+  newScore: number,
+  prevScore: number,
+  scanId: string,
+  fixedIssues: string[],
+  newIssues: string[]
+): Promise<boolean> {
+  try {
+    const resend = getResend();
+    if (!resend) {
+      console.log('Email skipped — RESEND_API_KEY not set');
+      return false;
+    }
+
+    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://cyber-gh.vercel.app'}/report/${scanId}`;
+    const scoreDelta = newScore - prevScore;
+    const scoreColor = scoreDelta > 0 ? '#2E7D32' : scoreDelta < 0 ? '#C8102E' : '#6B7280';
+    const scoreSign = scoreDelta > 0 ? '+' : '';
+
+    const toEmail = process.env.RESEND_TEST_MODE === 'true'
+      ? (process.env.RESEND_VERIFIED_EMAIL || email)
+      : email;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ScanVault Monitoring Alert</title>
+</head>
+<body style="background: #F4F6FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 40px 20px; -webkit-font-smoothing: antialiased;">
+
+  <table style="width: 100%; max-width: 600px; margin: 0 auto; border-spacing: 0;">
+    <tr>
+      <td style="background: white; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; padding: 0;">
+        <table style="width: 100%; border-spacing: 0;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: #0A1628; padding: 24px 32px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em;">ScanVault Alert</h1>
+              <p style="color: #94A3B8; margin: 4px 0 0; font-size: 13px;">Continuous Website Security Monitoring</p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 32px;">
+              <h2 style="font-size: 18px; font-weight: 700; color: #0A1628; margin: 0 0 16px;">
+                Security update for ${domain}
+              </h2>
+              
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 13px; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                  Security Score
+                </div>
+                <div style="font-size: 32px; font-weight: 800; color: #0A1628; margin-bottom: 4px;">
+                  ${newScore} <span style="font-size: 16px; font-weight: 400; color: #94A3B8;">/ 100</span>
+                </div>
+                <div style="font-size: 14px; font-weight: 700; color: ${scoreColor};">
+                  Score changed by ${scoreSign}${scoreDelta} points (from ${prevScore})
+                </div>
+              </div>
+
+              \${fixedIssues.length > 0 ? \`
+              <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 13px; font-weight: 700; color: #2E7D32; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px;">
+                  ✅ \${fixedIssues.length} issue\${fixedIssues.length > 1 ? 's' : ''} fixed
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.6;">
+                  \${fixedIssues.map(title => \`<li>\${title}</li>\`).join('')}
+                </ul>
+              </div>
+              \` : ''}
+
+              \${newIssues.length > 0 ? \`
+              <div style="margin-bottom: 24px;">
+                <h3 style="font-size: 13px; font-weight: 700; color: #C8102E; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px;">
+                  ⚠️ \${newIssues.length} new issue\${newIssues.length > 1 ? 's' : ''} detected
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.6;">
+                  \${newIssues.map(title => \`<li>\${title}</li>\`).join('')}
+                </ul>
+              </div>
+              \` : ''}
+
+              <div style="text-align: center; margin-top: 32px;">
+                <a href="\${reportUrl}" style="
+                  display: inline-block;
+                  background: #0A1628;
+                  color: white;
+                  text-decoration: none;
+                  padding: 12px 24px;
+                  border-radius: 8px;
+                  font-weight: 600;
+                  font-size: 14px;
+                ">View Detailed Report</a>
+              </div>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background: #F4F6FA; border-radius: 0 0 16px 16px; padding: 20px 32px; text-align: center;">
+              <div style="color: #94A3B8; font-size: 12px; line-height: 1.6;">
+                You received this because weekly security monitoring is enabled for ${domain} on ScanVault.<br>
+                <a href="https://cyber-gh.vercel.app" style="color: #0A1628; text-decoration: none; font-weight: 600;">scanvault.app</a>
+                &nbsp;·&nbsp; Made in Ghana 🇬🇭
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+    `;
+
+    await resend.emails.send({
+      from: 'ScanVault <onboarding@resend.dev>',
+      to: toEmail,
+      subject: `ScanVault Security Alert: ${domain} score updated (${scoreSign}${scoreDelta} pts)`,
+      html,
+    });
+
+    return true;
+  } catch (err) {
+    console.error('Monitoring email failed:', err);
+    return false;
+  }
+}

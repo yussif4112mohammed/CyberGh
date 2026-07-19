@@ -66,3 +66,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
+-- ── Monitored Domains ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS monitored_domains (
+  id           SERIAL        PRIMARY KEY,
+  user_id      INTEGER       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  domain       VARCHAR(255)  NOT NULL,
+  created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  last_scan_at TIMESTAMPTZ   NULL,
+  UNIQUE(user_id, domain)
+);
+
+CREATE INDEX IF NOT EXISTS idx_monitored_domains_user_id ON monitored_domains(user_id);
+

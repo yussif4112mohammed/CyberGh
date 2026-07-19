@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Shield, Loader2, ArrowRight, RefreshCw, AlertCircle, Plus } from 'lucide-react';
+import { Shield, Loader2, ArrowRight, Trash2, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 interface User {
@@ -21,24 +21,35 @@ interface ScanRecord {
   created_at: string;
 }
 
+interface MonitoredDomain {
+  id: number;
+  domain: string;
+  created_at: string;
+  last_scan_at: string | null;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [history, setHistory] = useState<ScanRecord[]>([]);
+  const [monitored, setMonitored] = useState<MonitoredDomain[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Quick scan state
-  const [scanDomain, setScanDomain] = useState('');
-  const [scanning, setScanning] = useState(false);
-  const [scanError, setScanError] = useState('');
+  // Monitoring manage state
+  const [newDomain, setNewDomain] = useState('');
+  const [addingDomain, setAddingDomain] = useState(false);
+  const [monitorError, setMonitorError] = useState('');
+  
+  // Quick scanning action
+  const [rescanningDomain, setRescanningDomain] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Load auth user and history parallelly
+  const loadData = () => {
     Promise.all([
       fetch('/api/auth/me').then(r => r.json()),
-      fetch('/api/scan/history?user=true').then(r => r.json())
+      fetch('/api/scan/history?user=true').then(r => r.json()),
+      fetch('/api/monitor').then(r => r.json())
     ])
-      .then(([userData, historyData]) => {
+      .then(([userData, historyData, monitorData]) => {
         if (userData.user) {
           setUser(userData.user);
         } else {
@@ -47,35 +58,81 @@ export default function DashboardPage() {
         if (historyData.history) {
           setHistory(historyData.history);
         }
+        if (monitorData.domains) {
+          setMonitored(monitorData.domains);
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
   }, [router]);
 
-  const handleQuickScan = async (e: React.FormEvent) => {
+  const handleAddMonitor = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!scanDomain.trim()) return;
-    setScanning(true);
-    setScanError('');
+    if (!newDomain.trim()) return;
+    setAddingDomain(true);
+    setMonitorError('');
 
+    try {
+      const res = await fetch('/api/monitor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: newDomain.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMonitorError(data.error || 'Failed to add domain');
+        setAddingDomain(false);
+        return;
+      }
+      setNewDomain('');
+      
+      // Reload monitored list
+      const monitorRes = await fetch('/api/monitor');
+      const monitorData = await monitorRes.json();
+      if (monitorData.domains) {
+        setMonitored(monitorData.domains);
+      }
+    } catch {
+      setMonitorError('Connection failed. Please try again.');
+    } finally {
+      setAddingDomain(false);
+    }
+  };
+
+  const handleRemoveMonitor = async (domain: string) => {
+    if (!confirm(`Are you sure you want to disable continuous monitoring for ${domain}?`)) return;
+    try {
+      const res = await fetch(`/api/monitor?domain=${encodeURIComponent(domain)}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setMonitored(monitored.filter(m => m.domain !== domain));
+      }
+    } catch (err) {
+      console.error('Failed to remove monitored domain:', err);
+    }
+  };
+
+  const handleManualRescan = async (domain: string) => {
+    setRescanningDomain(domain);
     try {
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: scanDomain.trim() }),
+        body: JSON.stringify({ domain }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setScanError(data.error || 'Scan failed');
-        setScanning(false);
-        return;
-      }
       if (data.scanId) {
         router.push(`/report/${data.scanId}`);
       }
     } catch {
-      setScanError('Failed to run scan. Check your internet connection.');
-      setScanning(false);
+      alert('Rescan failed. Check your internet connection.');
+    } finally {
+      setRescanningDomain(null);
     }
   };
 
@@ -148,41 +205,87 @@ export default function DashboardPage() {
             </div>
 
             <div className="card p-6 bg-white border border-gray-100 shadow-sm flex flex-col justify-between">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Latest Website Scanned</p>
-              <div className="truncate text-navy-950 font-medium text-lg mt-2">
-                {history.length > 0 ? history[0].domain : 'No scans run yet'}
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Monitored Websites</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-display font-bold text-navy-950">{monitored.length}</span>
+                <span className="text-xs text-gray-400">active alerts</span>
               </div>
             </div>
           </div>
 
-          {/* Quick scan & Scan History */}
+          {/* Monitoring & Scan History */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Quick scan card */}
+            {/* Monitor website manager */}
             <div className="lg:col-span-1 space-y-6">
               <div className="card p-6 bg-white border border-gray-100 shadow-sm">
-                <h2 className="font-display font-bold text-lg text-navy-950 mb-3">Quick scan a site</h2>
-                <p className="text-xs text-gray-400 mb-4">Run a passive scan on any domain to add it to your dashboard.</p>
-                <form onSubmit={handleQuickScan} className="space-y-3">
-                  <input
-                    type="text"
-                    required
-                    value={scanDomain}
-                    onChange={e => setScanDomain(e.target.value)}
-                    placeholder="yourbusiness.com.gh"
-                    className="input w-full text-sm font-medium"
-                    disabled={scanning}
-                  />
-                  {scanError && <p className="text-xs text-red-600">{scanError}</p>}
-                  <button
-                    type="submit"
-                    disabled={scanning || !scanDomain.trim()}
-                    className="btn-primary w-full justify-center text-sm py-2.5"
-                  >
-                    {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                    {scanning ? 'Running scan...' : 'Add & Scan Domain'}
-                  </button>
+                <h2 className="font-display font-bold text-lg text-navy-950 mb-3">Monitor Websites</h2>
+                <p className="text-xs text-gray-400 mb-4">Add websites to receive weekly automated scans and threat alerts.</p>
+                
+                <form onSubmit={handleAddMonitor} className="space-y-3 mb-6">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      required
+                      value={newDomain}
+                      onChange={e => setNewDomain(e.target.value)}
+                      placeholder="yourbusiness.com"
+                      className="input flex-1 text-sm font-medium"
+                      disabled={addingDomain}
+                    />
+                    <button
+                      type="submit"
+                      disabled={addingDomain || !newDomain.trim()}
+                      className="btn-primary text-sm p-2.5 rounded-xl"
+                    >
+                      {addingDomain ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {monitorError && <p className="text-xs text-red-600">{monitorError}</p>}
                 </form>
+
+                {/* Monitored domains list */}
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Your Tracking List</p>
+                  
+                  {monitored.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No websites monitored yet. Add one above to schedule weekly checks.</p>
+                  ) : (
+                    monitored.map(item => (
+                      <div key={item.id} className="flex items-center justify-between p-3 bg-navy-50/50 border border-navy-100/50 rounded-xl">
+                        <div className="min-w-0 flex-1 pr-2">
+                          <p className="text-sm font-semibold text-navy-950 truncate">{item.domain}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            {item.last_scan_at
+                              ? `Last scan: ${new Date(item.last_scan_at).toLocaleDateString('en-GH', { month: 'short', day: 'numeric' })}`
+                              : 'Pending first scan'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleManualRescan(item.domain)}
+                            disabled={rescanningDomain !== null}
+                            title="Rescan now"
+                            className="p-1.5 text-gray-400 hover:text-navy-950 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 transition-all"
+                          >
+                            {rescanningDomain === item.domain ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleRemoveMonitor(item.domain)}
+                            title="Remove monitoring"
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
               
               {user.plan === 'free' && (
@@ -190,9 +293,9 @@ export default function DashboardPage() {
                   <div className="absolute right-0 bottom-0 opacity-10">
                     <Shield className="w-32 h-32 text-white" />
                   </div>
-                  <h3 className="font-display font-bold text-lg mb-2">Continuous Monitoring</h3>
+                  <h3 className="font-display font-bold text-lg mb-2">Unlock More Alerts</h3>
                   <p className="text-xs text-gray-300 leading-relaxed mb-4">
-                    Upgrade to Starter or Pro to configure weekly automated rescans, custom reporting alerts, and domain verification checks.
+                    Upgrade to Starter (3 domains) or Pro (10 domains) to monitor your complete production and staging ecosystem.
                   </p>
                   <Link href="/pricing" className="text-sm font-semibold text-white inline-flex items-center gap-1.5 hover:underline">
                     View premium plans <ArrowRight className="w-4 h-4" />
@@ -213,7 +316,7 @@ export default function DashboardPage() {
                   <div className="p-12 text-center">
                     <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                     <p className="text-sm text-navy-950 font-medium">No scans run on this account yet</p>
-                    <p className="text-xs text-gray-400 mt-1 mb-4">Enter a website URL above to run your first automated check.</p>
+                    <p className="text-xs text-gray-400 mt-1 mb-4">Enter a website URL under the monitoring list to trigger your first audit.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
