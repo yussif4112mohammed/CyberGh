@@ -205,7 +205,7 @@ function buildReportEmail(result: ScanResult, reportUrl: string): string {
                 <div style="color: #94A3B8; font-size: 13px; margin-bottom: 16px;">
                   Book a free 30-minute consultation. We'll walk through your report and create a fix plan.
                 </div>
-                <a href="https://cyber-gh.vercel.app/contact" style="
+                <a href="https://scanvault.vercel.app/contact" style="
                   display: inline-block;
                   background: #C8102E;
                   color: white;
@@ -229,9 +229,9 @@ function buildReportEmail(result: ScanResult, reportUrl: string): string {
             ">
               <div style="color: #94A3B8; font-size: 12px; line-height: 1.6;">
                 You received this because you requested a security scan on ScanVault.<br>
-                <a href="https://cyber-gh.vercel.app" style="color: #0A1628; text-decoration: none; font-weight: 600;">cyber-gh.vercel.app</a>
+                <a href="https://scanvault.vercel.app" style="color: #0A1628; text-decoration: none; font-weight: 600;">scanvault.vercel.app</a>
                 &nbsp;·&nbsp;
-                <a href="https://cyber-gh.vercel.app/privacy" style="color: #94A3B8; text-decoration: none;">Privacy Policy</a>
+                <a href="https://scanvault.vercel.app/privacy" style="color: #94A3B8; text-decoration: none;">Privacy Policy</a>
                 &nbsp;·&nbsp; Made in Ghana 🇬🇭
               </div>
             </td>
@@ -259,7 +259,7 @@ export async function sendReportEmail(
       return false;
     }
 
-    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://cyber-gh.vercel.app'}/report/${scanId}`;
+    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault.vercel.app'}/report/${scanId}`;
     const scoreLabel = getScoreLabel(result.score);
     const toEmail = process.env.RESEND_TEST_MODE === 'true'
       ? (process.env.RESEND_VERIFIED_EMAIL || email)
@@ -295,7 +295,7 @@ export async function sendMonitoringAlertEmail(
       return false;
     }
 
-    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://cyber-gh.vercel.app'}/report/${scanId}`;
+    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault.vercel.app'}/report/${scanId}`;
     const scoreDelta = newScore - prevScore;
     const scoreColor = scoreDelta > 0 ? '#2E7D32' : scoreDelta < 0 ? '#C8102E' : '#6B7280';
     const scoreSign = scoreDelta > 0 ? '+' : '';
@@ -388,7 +388,7 @@ export async function sendMonitoringAlertEmail(
             <td style="background: #F4F6FA; border-radius: 0 0 16px 16px; padding: 20px 32px; text-align: center;">
               <div style="color: #94A3B8; font-size: 12px; line-height: 1.6;">
                 You received this because weekly security monitoring is enabled for ${domain} on ScanVault.<br>
-                <a href="https://cyber-gh.vercel.app" style="color: #0A1628; text-decoration: none; font-weight: 600;">scanvault.app</a>
+                <a href="https://scanvault.vercel.app" style="color: #0A1628; text-decoration: none; font-weight: 600;">scanvault.app</a>
                 &nbsp;·&nbsp; Made in Ghana 🇬🇭
               </div>
             </td>
