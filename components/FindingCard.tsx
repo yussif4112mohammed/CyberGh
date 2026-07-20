@@ -26,6 +26,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   subdomain: 'Subdomain',
   directory: 'Directory Listing',
   fingerprint: 'Tech Stack',
+  cors: 'CORS Policy',
 };
 
 interface FindingCardProps {

@@ -10,6 +10,7 @@ import { checkHttpRedirect }     from './redirect';
 import { checkSubdomains }       from './subdomains';
 import { checkDirectoryListing } from './directory';
 import { checkFingerprint }      from './fingerprint';
+import { checkCORS }             from './cors';
 import { Finding, ScanResult }   from '@/types/scan';
 import { v4 as uuid }            from 'uuid';
 
@@ -42,7 +43,7 @@ function summarise(findings: Finding[]) {
   };
 }
 
-export type CheckName = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'cookies' | 'breach' | 'wordpress' | 'redirect' | 'subdomain' | 'directory' | 'fingerprint';
+export type CheckName = 'ssl' | 'headers' | 'paths' | 'dns' | 'ports' | 'cookies' | 'breach' | 'wordpress' | 'redirect' | 'subdomain' | 'directory' | 'fingerprint' | 'cors';
 
 export const CHECKS: { name: CheckName; label: string }[] = [
   { name: 'ssl',       label: 'SSL/TLS Certificate' },
@@ -57,6 +58,7 @@ export const CHECKS: { name: CheckName; label: string }[] = [
   { name: 'subdomain', label: 'Subdomain Takeover' },
   { name: 'directory', label: 'Directory Listing' },
   { name: 'fingerprint', label: 'Tech Stack Fingerprinting' },
+  { name: 'cors',      label: 'CORS Policy Check' },
 ];
 
 interface LogItem {
@@ -121,6 +123,7 @@ export async function runScan(
   onProgress?.('subdomain');
   onProgress?.('directory');
   onProgress?.('fingerprint');
+  onProgress?.('cors');
 
   const parallelChecks = [
     runTimedCheck('headers', () => checkHeaders(domain)),
@@ -134,6 +137,7 @@ export async function runScan(
     runTimedCheck('subdomain', () => checkSubdomains(domain)),
     runTimedCheck('directory', () => checkDirectoryListing(domain)),
     runTimedCheck('fingerprint', () => checkFingerprint(domain)),
+    runTimedCheck('cors', () => checkCORS(domain)),
   ];
 
   const results = await Promise.all(parallelChecks);
