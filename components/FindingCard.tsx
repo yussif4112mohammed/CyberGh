@@ -27,6 +27,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   directory: 'Directory Listing',
   fingerprint: 'Tech Stack',
   cors: 'CORS Policy',
+  meta: 'Metadata & Files',
 };
 
 interface FindingCardProps {
