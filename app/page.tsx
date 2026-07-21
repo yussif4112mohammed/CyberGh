@@ -15,6 +15,8 @@ const CHECKS_DISPLAY = [
   { icon: Globe,    label: 'HTTP→HTTPS Redirect & Mixed Content' },
   { icon: Globe,    label: 'Subdomain Takeover Detection' },
   { icon: Globe,    label: 'Directory Listing Detection' },
+  { icon: Shield,   label: 'CORS Configuration Check' },
+  { icon: Globe,    label: 'Metadata & Configuration' },
 ];
 
 const STATS = [
@@ -92,6 +94,8 @@ export default function HomePage() {
       'Running WordPress security checks...',
       'Running subdomain checks...',
       'Checking directory listing...',
+      'Auditing CORS policies...',
+      'Analyzing robots.txt & security.txt...',
       'Calculating security score...',
     ];
 
