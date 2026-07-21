@@ -61,6 +61,8 @@ CREATE TABLE IF NOT EXISTS users (
   plan          VARCHAR(20)   NOT NULL DEFAULT 'free'
                               CHECK (plan IN ('free','starter','pro')),
   monitored_domains JSONB     NULL,
+  paystack_customer_code VARCHAR(100) NULL,
+  subscription_status VARCHAR(50) DEFAULT 'inactive',
   created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 

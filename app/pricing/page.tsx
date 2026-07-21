@@ -1,9 +1,11 @@
 'use client';
-import { CheckCircle, Shield, Zap, Building } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle, Shield, Zap, Building, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 const PLANS = [
   {
+    id: 'free',
     name: 'Free',
     price: 'GHS 0',
     period: '',
@@ -15,7 +17,7 @@ const PLANS = [
     ctaStyle: 'btn-outline',
     features: [
       'One-time website security scan',
-      '10-point security check',
+      '12-point security check',
       'Plain-language findings report',
       'Fix instructions for every issue',
       'Ghana compliance score',
@@ -28,20 +30,20 @@ const PLANS = [
     ],
   },
   {
+    id: 'starter',
     name: 'Starter',
-    price: 'GHS 150',
+    price: 'GHS 250',
     period: '/month',
     description: 'For small businesses serious about protecting customer data',
     icon: Zap,
     color: 'border-ghana-red',
     badge: 'Most Popular',
     cta: 'Get Started',
-    ctaHref: '/contact',
     ctaStyle: 'btn-primary',
     features: [
       'Everything in Free',
-      'Daily automated rescans',
-      'Alert when new issues found',
+      'Weekly automated rescans',
+      'Change detection threat alerts',
       'SSL expiry warnings (14 days ahead)',
       'Weekly staff security tip emails',
       'Monthly security summary PDF',
@@ -51,17 +53,18 @@ const PLANS = [
     missing: [],
   },
   {
+    id: 'pro',
     name: 'Pro',
-    price: 'GHS 350',
+    price: 'GHS 600',
     period: '/month',
     description: 'For businesses needing deeper security and compliance evidence',
     icon: Building,
     color: 'border-navy-700',
-    cta: 'Talk to Us',
-    ctaHref: '/contact',
+    cta: 'Upgrade to Pro',
     ctaStyle: 'btn-secondary',
     features: [
       'Everything in Starter',
+      'Extended domain limits (up to 10 sites)',
       'Deep vulnerability scanning (OWASP Top 10)',
       'Staff phishing simulation tests',
       'Compliance gap report for DPC registration',
@@ -88,6 +91,38 @@ const PENTEST = {
 };
 
 export default function PricingPage() {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleCheckout = async (planId: string) => {
+    setLoadingPlan(planId);
+    try {
+      const authRes = await fetch('/api/auth/me');
+      const authData = await authRes.json();
+      
+      if (!authData.user) {
+        window.location.href = `/login?redirect=/pricing`;
+        return;
+      }
+      
+      const checkoutRes = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId }),
+      });
+      const checkoutData = await checkoutRes.json();
+      
+      if (checkoutRes.ok && checkoutData.authorization_url) {
+        window.location.href = checkoutData.authorization_url;
+      } else {
+        alert(checkoutData.error || 'Failed to start payment checkout session');
+      }
+    } catch {
+      alert('Payment initialization failed. Check your internet connection.');
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -99,47 +134,64 @@ export default function PricingPage() {
               Simple, transparent pricing
             </h1>
             <p className="text-gray-500 text-lg">
-              Built for Ghanaian business budgets. No hidden fees, no contracts, cancel anytime.
+              Built for Ghanaian business budgets. No hidden fees, cancel anytime.
             </p>
           </div>
 
           {/* Plans */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {PLANS.map(plan => (
-              <div key={plan.name} className={`card p-6 border-2 ${plan.color} relative hover:scale-[1.02] hover:shadow-card-hover transition-all duration-300`}>
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-ghana-red text-white text-xs font-bold px-3 py-1 rounded-full">
-                      {plan.badge}
-                    </span>
+              <div key={plan.name} className={`card p-6 border-2 ${plan.color} relative hover:scale-[1.02] hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between`}>
+                <div>
+                  {plan.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-ghana-red text-white text-xs font-bold px-3 py-1 rounded-full">
+                        {plan.badge}
+                      </span>
+                    </div>
+                  )}
+                  <plan.icon className="w-7 h-7 text-navy-700 mb-3" />
+                  <h2 className="font-display font-bold text-xl text-navy-950 mb-0.5">{plan.name}</h2>
+                  <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
+                  <div className="mb-5">
+                    <span className="font-display font-bold text-3xl text-navy-950">{plan.price}</span>
+                    <span className="text-gray-400 text-sm">{plan.period}</span>
                   </div>
-                )}
-                <plan.icon className="w-7 h-7 text-navy-700 mb-3" />
-                <h2 className="font-display font-bold text-xl text-navy-950 mb-0.5">{plan.name}</h2>
-                <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
-                <div className="mb-5">
-                  <span className="font-display font-bold text-3xl text-navy-950">{plan.price}</span>
-                  <span className="text-gray-400 text-sm">{plan.period}</span>
+
+                  {plan.id === 'free' ? (
+                    <a href={plan.ctaHref} className={`${plan.ctaStyle} w-full justify-center mb-6`}>
+                      {plan.cta}
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => handleCheckout(plan.id)}
+                      disabled={loadingPlan !== null}
+                      className={`${plan.ctaStyle} w-full justify-center mb-6 py-2.5 rounded-xl`}
+                    >
+                      {loadingPlan === plan.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                      ) : null}
+                      {loadingPlan === plan.id ? 'Connecting...' : plan.cta}
+                    </button>
+                  )}
+
+                  <ul className="space-y-2.5">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
+                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                        {f}
+                      </li>
+                    ))}
+                    {plan.missing.map(f => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-gray-400">
+                        <div className="w-4 h-4 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                          <div className="w-3 h-px bg-gray-300" />
+                        </div>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <a href={plan.ctaHref} className={`${plan.ctaStyle} w-full justify-center mb-6`}>
-                  {plan.cta}
-                </a>
-                <ul className="space-y-2.5">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                      {f}
-                    </li>
-                  ))}
-                  {plan.missing.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-400">
-                      <div className="w-4 h-4 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                        <div className="w-3 h-px bg-gray-300" />
-                      </div>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
               </div>
             ))}
           </div>
@@ -160,7 +212,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
               </div>
-              <div className="text-center sm:text-right">
+              <div className="text-center sm:text-right flex-shrink-0">
                 <div className="font-display font-bold text-2xl text-white mb-1">{PENTEST.price}</div>
                 <p className="text-gray-400 text-sm mb-4">per engagement</p>
                 <a href="/contact" className="btn-primary">Request a Quote</a>
