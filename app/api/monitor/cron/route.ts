@@ -30,13 +30,13 @@ async function handleCron(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2️⃣ Fetch monitored domains due for rescan (scanned > 7 days ago, or never scanned)
+    // 2️⃣ Fetch monitored domains due for rescan (verified, and scanned > 7 days ago, or never scanned)
     const monitoredList = await query(
       `SELECT m.id, m.domain, m.user_id, u.email as user_email
        FROM monitored_domains m
        JOIN users u ON m.user_id = u.id
-       WHERE m.last_scan_at IS NULL OR m.last_scan_at < NOW() - INTERVAL '7 days'
-       LIMIT 5` // limit 5 per batch run to stay safe from Vercel timeout limits (60-120s max)
+       WHERE m.verified = TRUE AND (m.last_scan_at IS NULL OR m.last_scan_at < NOW() - INTERVAL '7 days')
+       LIMIT 5` // limit 5 per batch run to stay safe from Vercel timeout limits
     );
 
     if (monitoredList.length === 0) {

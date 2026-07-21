@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS monitored_domains (
   id           SERIAL        PRIMARY KEY,
   user_id      INTEGER       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   domain       VARCHAR(255)  NOT NULL,
+  verified     BOOLEAN       NOT NULL DEFAULT FALSE,
+  verification_token VARCHAR(64) NULL,
   created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   last_scan_at TIMESTAMPTZ   NULL,
   UNIQUE(user_id, domain)

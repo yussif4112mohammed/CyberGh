@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { query, queryOne, execute } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
     }
 
     const rows = await query(
-      `SELECT id, domain, created_at, last_scan_at FROM monitored_domains
+      `SELECT id, domain, verified, verification_token, created_at, last_scan_at FROM monitored_domains
        WHERE user_id = $1
        ORDER BY domain ASC`,
       [user.id]
@@ -95,11 +96,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Generate unique verification token
+    const token = 'scanvault-verify-' + crypto.randomBytes(16).toString('hex');
+
     // Insert domain (fails on UNIQUE constraint if already added by this user)
     try {
       await execute(
-        'INSERT INTO monitored_domains (user_id, domain) VALUES (?, ?)',
-        [user.id, domain]
+        'INSERT INTO monitored_domains (user_id, domain, verified, verification_token) VALUES (?, ?, FALSE, ?)',
+        [user.id, domain, token]
       );
     } catch (dbErr: any) {
       if (dbErr.code === '23505') { // Unique violation in PG
@@ -108,7 +112,7 @@ export async function POST(req: NextRequest) {
       throw dbErr;
     }
 
-    return NextResponse.json({ success: true, message: `Domain "${domain}" added to monitoring` });
+    return NextResponse.json({ success: true, message: `Domain "${domain}" added to monitoring`, token });
   } catch (err) {
     console.error('Add monitoring error:', err);
     return NextResponse.json({ error: 'Failed to add domain to monitoring' }, { status: 500 });
