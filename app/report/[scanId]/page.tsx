@@ -126,44 +126,48 @@ export default function ReportPage() {
         <div className="max-w-4xl mx-auto px-6">
 
           {/* ── Header ── */}
-          <div className="card p-8 mb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <ScoreGauge score={result.score} size="lg" />
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Security Report</p>
-                <h1 className="font-display font-bold text-3xl text-navy-950 mb-1">
-                  {result.domain}
-                </h1>
-                <p className="text-sm text-gray-400 mb-4">
-                  Scanned {new Date(result.created_at).toLocaleDateString('en-GH', { dateStyle: 'long' })}
-                </p>
+          <div className="card p-6 sm:p-8 mb-6 overflow-hidden">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1 min-w-0 w-full">
+                <ScoreGauge score={result.score} size="lg" />
+                <div className="flex-1 min-w-0 w-full">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Security Report</p>
+                  <h1 className="font-display font-bold text-2xl sm:text-3xl text-navy-950 mb-1 break-words truncate">
+                    {result.domain}
+                  </h1>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Scanned {new Date(result.created_at).toLocaleDateString('en-GH', { dateStyle: 'long' })}
+                  </p>
 
-                {/* Detected Technologies */}
-                {result.findings.some(f => f.category === 'fingerprint' && f.severity === 'info') && (
-                  <div className="mb-4">
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Detected Technologies</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {result.findings
-                        .filter(f => f.category === 'fingerprint' && f.severity === 'info')
-                        .map((f, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 text-xs bg-navy-100 text-navy-800 px-2.5 py-1 rounded-full font-medium">
-                            {f.title.replace('Detected: ', '')}
-                          </span>
-                        ))}
+                  {/* Detected Technologies */}
+                  {result.findings.some(f => f.category === 'fingerprint' && f.severity === 'info') && (
+                    <div className="mb-4">
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Detected Technologies</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {result.findings
+                          .filter(f => f.category === 'fingerprint' && f.severity === 'info')
+                          .map((f, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 text-xs bg-navy-100 text-navy-800 px-2.5 py-1 rounded-full font-medium">
+                              {f.title.replace('Detected: ', '')}
+                            </span>
+                          ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Summary badges */}
-                <div className="flex flex-wrap gap-2">
-                  {result.summary.critical > 0 && <span className="severity-critical">{result.summary.critical} Critical</span>}
-                  {result.summary.high > 0     && <span className="severity-high">{result.summary.high} High</span>}
-                  {result.summary.medium > 0   && <span className="severity-medium">{result.summary.medium} Medium</span>}
-                  {result.summary.low > 0      && <span className="severity-low">{result.summary.low} Low</span>}
-                  {result.summary.pass > 0     && <span className="severity-pass">{result.summary.pass} Passed</span>}
+                  {/* Summary badges */}
+                  <div className="flex flex-wrap gap-2">
+                    {result.summary.critical > 0 && <span className="severity-critical">{result.summary.critical} Critical</span>}
+                    {result.summary.high > 0     && <span className="severity-high">{result.summary.high} High</span>}
+                    {result.summary.medium > 0   && <span className="severity-medium">{result.summary.medium} Medium</span>}
+                    {result.summary.low > 0      && <span className="severity-low">{result.summary.low} Low</span>}
+                    {result.summary.pass > 0     && <span className="severity-pass">{result.summary.pass} Passed</span>}
+                  </div>
                 </div>
               </div>
-              <div className="flex gap-2">
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100 flex-shrink-0">
                 <button
                   id="share-report-btn"
                   onClick={() => {
@@ -171,7 +175,7 @@ export default function ReportPage() {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className="btn-outline text-sm py-2"
+                  className="btn-outline text-xs sm:text-sm py-2 px-3.5 flex-1 sm:flex-initial justify-center whitespace-nowrap"
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copied!' : 'Copy Link'}
@@ -179,7 +183,7 @@ export default function ReportPage() {
                 <button
                   id="download-pdf-btn"
                   onClick={() => window.print()}
-                  className="btn-outline text-sm py-2 print:hidden"
+                  className="btn-outline text-xs sm:text-sm py-2 px-3.5 print:hidden flex-1 sm:flex-initial justify-center whitespace-nowrap"
                 >
                   <Download className="w-3.5 h-3.5" /> Download PDF
                 </button>
@@ -187,7 +191,7 @@ export default function ReportPage() {
                   onClick={handleRescan}
                   disabled={rescanLoading}
                   id="rescan-btn"
-                  className="btn-outline text-sm py-2 print:hidden"
+                  className="btn-outline text-xs sm:text-sm py-2 px-3.5 print:hidden flex-1 sm:flex-initial justify-center whitespace-nowrap"
                 >
                   {rescanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                   {rescanLoading ? 'Scanning...' : 'Re-scan'}
