@@ -16,7 +16,7 @@ const PLAN_AMOUNTS: Record<string, number> = {
 };
 
 async function getAuthUser() {
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = (await cookies()).get('session')?.value;
   if (!sessionCookie) return null;
 
   try {

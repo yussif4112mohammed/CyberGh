@@ -16,7 +16,7 @@ const PLAN_LIMITS: Record<string, number> = {
 
 // Helper: Authenticate user from session cookie
 async function getAuthUser() {
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = (await cookies()).get('session')?.value;
   if (!sessionCookie) return null;
 
   try {

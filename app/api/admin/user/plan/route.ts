@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'scanvault_fallback_secret_key_123'
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'yussif4112@gmail.com').split(',').map(e => e.trim().toLowerCase());
 
 async function isAdmin() {
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = (await cookies()).get('session')?.value;
   if (!sessionCookie) return false;
 
   try {

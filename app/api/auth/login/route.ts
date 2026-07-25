@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Set cookie
-    cookies().set('session', token, {
+    (await cookies()).set('session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     // Decode session token if available to link user
     let userId: number | null = null;
     try {
-      const sessionCookie = cookies().get('session')?.value;
+      const sessionCookie = (await cookies()).get('session')?.value;
       if (sessionCookie) {
         const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
         if (decoded && decoded.userId) {

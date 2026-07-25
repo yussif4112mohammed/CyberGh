@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 const JWT_SECRET = process.env.JWT_SECRET || 'scanvault_fallback_secret_key_123';
 
 async function getAuthUser() {
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = (await cookies()).get('session')?.value;
   if (!sessionCookie) return null;
 
   try {

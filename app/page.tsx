@@ -35,6 +35,7 @@ export default function HomePage() {
   const [scanning, setScanning] = useState(false);
   const [currentCheck, setCurrentCheck] = useState('');
   const [error, setError] = useState('');
+  const [businessMatches, setBusinessMatches] = useState<Array<{ name: string; domain: string; country: string; flag: string; source: string }>>([]);
 
   const [scanCount, setScanCount] = useState<number | null>(null);
 
@@ -45,45 +46,11 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  const startScan = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeScan = async (targetDomain: string) => {
+    setScanning(true);
+    setLookupStatus('');
     setError('');
-    setLookupError('');
     
-    let scanDomain = domain.trim();
-    
-    // Business name mode: look up the domain first
-    if (inputMode === 'business') {
-      if (!businessName.trim()) return;
-      setScanning(true);
-      setLookupStatus('Finding website for "' + businessName.trim() + '"...');
-      try {
-        const lookupRes = await fetch('/api/lookup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: businessName.trim() }),
-        });
-        const lookupData = await lookupRes.json();
-        if (!lookupRes.ok || !lookupData.domain) {
-          setLookupError(lookupData.error || 'Could not find website. Try entering the domain directly.');
-          setScanning(false);
-          setLookupStatus('');
-          return;
-        }
-        scanDomain = lookupData.domain;
-        setDomain(scanDomain);
-        setLookupStatus(`Found: ${scanDomain} — scanning now...`);
-      } catch {
-        setLookupError('Could not connect. Please try again.');
-        setScanning(false);
-        setLookupStatus('');
-        return;
-      }
-    } else {
-      if (!scanDomain) return;
-      setScanning(true);
-    }
-
     const checks = [
       'Checking SSL certificate...',
       'Scanning security headers...',
@@ -99,7 +66,6 @@ export default function HomePage() {
       'Calculating security score...',
     ];
 
-    // Show progress labels while the real scan runs in the background
     let i = 0;
     const interval = setInterval(() => {
       if (i < checks.length) { setCurrentCheck(checks[i]); i++; }
@@ -109,7 +75,7 @@ export default function HomePage() {
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: scanDomain }),
+        body: JSON.stringify({ domain: targetDomain }),
       });
       clearInterval(interval);
 
@@ -125,6 +91,57 @@ export default function HomePage() {
       setError('Could not connect. Please check your internet and try again.');
       setScanning(false);
     }
+  };
+
+  const startScan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLookupError('');
+    setBusinessMatches([]);
+    
+    let scanDomain = domain.trim();
+    
+    // Business name mode: look up the domain first
+    if (inputMode === 'business') {
+      if (!businessName.trim()) return;
+      setScanning(true);
+      setLookupStatus('Finding websites for "' + businessName.trim() + '"...');
+      try {
+        const lookupRes = await fetch('/api/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: businessName.trim() }),
+        });
+        const lookupData = await lookupRes.json();
+        if (!lookupRes.ok || (!lookupData.domain && !lookupData.matches)) {
+          setLookupError(lookupData.error || 'Could not find website. Try entering the domain directly.');
+          setScanning(false);
+          setLookupStatus('');
+          return;
+        }
+
+        // If multiple matches/countries exist, let the user choose!
+        if (lookupData.matches && lookupData.matches.length > 1) {
+          setBusinessMatches(lookupData.matches);
+          setScanning(false);
+          setLookupStatus('');
+          return;
+        }
+
+        scanDomain = lookupData.domain;
+        setDomain(scanDomain);
+        setLookupStatus(`Found: ${scanDomain} — scanning now...`);
+      } catch {
+        setLookupError('Could not connect. Please try again.');
+        setScanning(false);
+        setLookupStatus('');
+        return;
+      }
+    } else {
+      if (!scanDomain) return;
+    }
+
+    executeScan(scanDomain);
   };
 
   return (
@@ -230,6 +247,54 @@ export default function HomePage() {
               )}
               {lookupError && (
                 <p className="mt-3 text-red-600 text-sm text-center">{lookupError}</p>
+              )}
+
+              {/* Interactive Country / Region Matches Selection */}
+              {businessMatches && businessMatches.length > 0 && !scanning && (
+                <div className="mt-5 bg-white rounded-2xl p-5 border border-navy-100 shadow-xl text-left animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+                    <p className="text-xs font-bold uppercase tracking-wider text-navy-950 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-ghana-red" />
+                      Select Country / Region Option
+                    </p>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-semibold">
+                      {businessMatches.length} found
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3.5">
+                    We found multiple country and region websites for <span className="font-semibold text-navy-950">"{businessName}"</span>. Click the exact one you want to scan:
+                  </p>
+                  <div className="grid gap-2 max-h-60 overflow-y-auto pr-1">
+                    {businessMatches.map((match, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setDomain(match.domain);
+                          setBusinessMatches([]);
+                          setInputMode('domain');
+                          executeScan(match.domain);
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:border-navy-950 hover:bg-navy-50/50 transition-all text-left group shadow-sm hover:shadow"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-2xl flex-shrink-0" title={match.country}>{match.flag}</span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-navy-950 truncate group-hover:text-ghana-red transition-colors">
+                              {match.name}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate font-mono mt-0.5">
+                              {match.domain} • <span className="text-gray-400 font-sans font-medium">{match.country}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs font-bold text-navy-950 bg-white px-3 py-1.5 rounded-lg border border-gray-200 group-hover:bg-navy-950 group-hover:text-white transition-all flex-shrink-0 ml-2">
+                          Scan &rarr;
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Live progress */}

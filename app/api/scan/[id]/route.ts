@@ -5,11 +5,12 @@ import { sendReportEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const scan = await queryOne(
       'SELECT * FROM scans WHERE id = ?',
-      [params.id]
+      [id]
     );
 
     if (!scan) {
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
          WHEN 'info'     THEN 5
          WHEN 'pass'     THEN 6
          ELSE 7 END`,
-      [params.id]
+      [id]
     );
 
     const summary = {
@@ -59,7 +60,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // Save email to unlock full report + send the report via email
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const { email } = await req.json();
     if (!email || !email.includes('@')) {
@@ -67,17 +69,17 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     // Save email to database
-    await execute('UPDATE scans SET email = $1 WHERE id = $2', [email.toLowerCase(), params.id]);
+    await execute('UPDATE scans SET email = $1 WHERE id = $2', [email.toLowerCase(), id]);
 
     // Fetch the full scan result to include in the email
-    const scan = await queryOne('SELECT * FROM scans WHERE id = $1', [params.id]);
+    const scan = await queryOne('SELECT * FROM scans WHERE id = $1', [id]);
     if (scan) {
       const findings = await query(
         `SELECT * FROM findings WHERE scan_id = $1
          ORDER BY CASE severity
            WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3
            WHEN 'low' THEN 4 WHEN 'info' THEN 5 WHEN 'pass' THEN 6 ELSE 7 END`,
-        [params.id]
+        [id]
       );
 
       const summary = {
@@ -98,7 +100,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       };
 
       // Send email and await to prevent serverless container shutdown before complete
-      await sendReportEmail(email.toLowerCase(), result, params.id);
+      await sendReportEmail(email.toLowerCase(), result, id);
     }
 
     return NextResponse.json({ success: true });

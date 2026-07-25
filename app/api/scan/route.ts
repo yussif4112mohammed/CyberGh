@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     // Extract user session if logged in
     let userId: number | null = null;
     try {
-      const sessionCookie = cookies().get('session')?.value;
+      const sessionCookie = (await cookies()).get('session')?.value;
       if (sessionCookie) {
         const decoded = jwt.verify(sessionCookie, process.env.JWT_SECRET || 'scanvault_fallback_secret_key_123') as any;
         if (decoded && decoded.userId) {
