@@ -89,6 +89,8 @@ export async function checkSSL(domain: string): Promise<Finding[]> {
             description: 'TLS 1.0 and 1.1 are deprecated and have known vulnerabilities. Modern browsers may block connections that use them.',
             fix: 'Disable TLS 1.0 and 1.1 in your server configuration and enable TLS 1.2 and 1.3 only. Ask your hosting provider to help if needed.',
             evidence: `Protocol: ${protocol}`,
+            cve: 'CVE-2011-3389 (BEAST Exploit)',
+            regulation: 'Bank of Ghana CISD 2026 | PCI-DSS Req 4.1',
           });
         } else if (protocol) {
           findings.push({
@@ -114,6 +116,7 @@ export async function checkSSL(domain: string): Promise<Finding[]> {
           description: 'Your website does not have HTTPS set up, or the SSL connection failed. Visitors\' data (passwords, form inputs) is sent unencrypted over the internet. This is a critical risk and a violation of Ghana\'s Data Protection Act.',
           fix: 'Set up an SSL certificate immediately. Your hosting provider likely offers free SSL via Let\'s Encrypt — check your hosting control panel or contact their support.',
           evidence: err.message,
+          regulation: 'Bank of Ghana CISD 2026 (Sec 5.1) | Ghana Act 843 | GDPR Art. 32',
         });
         resolve(findings);
       });

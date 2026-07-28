@@ -11,6 +11,8 @@ export interface Finding {
   description: string;
   fix: string;
   evidence?: string;
+  cve?: string;
+  regulation?: string;
 }
 
 export interface ScanLog {

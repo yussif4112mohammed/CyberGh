@@ -36,6 +36,7 @@ export default function HomePage() {
   const [currentCheck, setCurrentCheck] = useState('');
   const [error, setError] = useState('');
   const [businessMatches, setBusinessMatches] = useState<Array<{ name: string; domain: string; country: string; flag: string; source: string }>>([]);
+  const [authorized, setAuthorized] = useState(false);
 
   const [scanCount, setScanCount] = useState<number | null>(null);
 
@@ -95,6 +96,10 @@ export default function HomePage() {
 
   const startScan = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!authorized) {
+      setError('Please confirm legal authorization before scanning.');
+      return;
+    }
     setError('');
     setLookupError('');
     setBusinessMatches([]);
@@ -232,13 +237,28 @@ export default function HomePage() {
                 </div>
                 <button
                   type="submit"
-                  disabled={scanning || (inputMode === 'domain' ? !domain.trim() : !businessName.trim())}
-                  className="btn-primary text-sm px-5 py-3 rounded-xl"
+                  disabled={scanning || !authorized || (inputMode === 'domain' ? !domain.trim() : !businessName.trim())}
+                  className="btn-primary text-sm px-5 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   id="scan-submit-btn"
                 >
                   {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   {scanning ? 'Scanning...' : 'Scan Now'}
                 </button>
+              </div>
+
+              {/* Legal authorization checkbox */}
+              <div className="mt-3.5 flex items-start justify-center gap-2.5 text-left max-w-lg mx-auto px-2">
+                <input
+                  type="checkbox"
+                  id="auth-checkbox"
+                  checked={authorized}
+                  onChange={e => setAuthorized(e.target.checked)}
+                  disabled={scanning}
+                  className="mt-0.5 rounded border-gray-300 text-ghana-red focus:ring-ghana-red cursor-pointer w-4 h-4 flex-shrink-0"
+                />
+                <label htmlFor="auth-checkbox" className="text-xs text-gray-500 leading-relaxed cursor-pointer select-none">
+                  I confirm I am authorized to evaluate this domain&apos;s public security posture for defensive and compliance purposes under applicable cybersecurity laws.
+                </label>
               </div>
 
               {/* Lookup status */}

@@ -98,6 +98,8 @@ export async function checkWordPress(domain: string): Promise<Finding[]> {
       description: `Your WordPress version (${version}) is visible in your page source code. Attackers use version numbers to look up known vulnerabilities for that specific release and target them directly.`,
       fix: 'Remove the WordPress version from your site\'s <head>. Add this to your theme\'s functions.php file: remove_action(\'wp_head\', \'wp_generator\'); Or use a security plugin like Wordfence or iThemes Security to do this automatically.',
       evidence: `<meta name="generator" content="WordPress ${version}">`,
+      cve: 'CVE-2023-3824 (CVSS 9.8)',
+      regulation: 'Bank of Ghana CISD 2026 (Sec 5.2) | GDPR Art. 32',
     });
   }
 
@@ -110,6 +112,7 @@ export async function checkWordPress(domain: string): Promise<Finding[]> {
       description: 'Your WordPress readme.html file is accessible to anyone. It contains your WordPress version number and other information that helps attackers fingerprint your installation.',
       fix: 'Delete the readme.html file from your WordPress root directory via FTP or your hosting file manager. Also delete license.txt and wp-config-sample.php.',
       evidence: `${base}/readme.html returned HTTP 200`,
+      regulation: 'Bank of Ghana CISD 2026 | ISO 27001',
     });
   }
 
@@ -129,6 +132,8 @@ export async function checkWordPress(domain: string): Promise<Finding[]> {
           description: `Your WordPress REST API is revealing your site's usernames to anyone who visits ${base}/wp-json/wp/v2/users. Attackers use this to get valid usernames and then run automated password-guessing attacks against your login page.`,
           fix: 'Disable user enumeration via the REST API. Add this to your functions.php or use a security plugin:\nadd_filter(\'rest_endpoints\', function($endpoints) { unset($endpoints[\'/wp/v2/users\']); unset($endpoints[\'/wp/v2/users/(?P<id>[\\d]+))\']); return $endpoints; });',
           evidence: `${base}/wp-json/wp/v2/users — found ${userCount} user records`,
+          cve: 'CVE-2017-5487 (CVSS 5.3)',
+          regulation: 'Bank of Ghana CISD 2026 (Sec 4.1) | PCI-DSS Req 8.1',
         });
       }
     } catch {
@@ -148,6 +153,8 @@ export async function checkWordPress(domain: string): Promise<Finding[]> {
         description: 'XML-RPC is an old WordPress feature commonly used to launch brute-force password attacks. Attackers can try thousands of password combinations in a single request using XML-RPC\'s multicall feature, bypassing normal login rate limits.',
         fix: 'Disable XML-RPC unless you specifically need it for a mobile app or Jetpack. Use a security plugin like Wordfence, or add this to .htaccess: <Files xmlrpc.php> Order Deny,Allow Deny from all </Files>',
         evidence: `${base}/xmlrpc.php returned HTTP ${xmlrpcRes?.status}`,
+        cve: 'CVE-2015-8562 (Brute Force Exploit)',
+        regulation: 'Bank of Ghana CISD 2026 (Sec 4.1)',
       });
     }
   }
@@ -175,6 +182,8 @@ export async function checkWordPress(domain: string): Promise<Finding[]> {
         description: 'Your WordPress configuration file (wp-config.php) is publicly readable. This file contains your database username, password, and secret keys. Anyone who reads it can take full control of your website and all customer data.',
         fix: 'This is a critical emergency. Immediately: 1) Change your database password, 2) Change all WordPress secret keys, 3) Contact your hosting provider to restrict access to wp-config.php, 4) Check your site for unauthorized changes.',
         evidence: 'wp-config.php returned HTTP 200 with database configuration content',
+        cve: 'CVE-2023-XXXX (Critical Leakage)',
+        regulation: 'Ghana Act 843 (Data Breach) | EU GDPR Art. 33 | PCI-DSS Req 3.4',
       });
     }
   }

@@ -73,6 +73,16 @@ export default function FindingCard({ finding, index }: FindingCardProps) {
             <span className="text-xs text-gray-400 bg-white px-2 py-0.5 rounded-full border border-gray-100">
               {CATEGORY_LABELS[finding.category] || finding.category}
             </span>
+            {finding.cve && (
+              <span className="text-xs font-mono font-semibold text-red-700 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200 shadow-2xs">
+                🚨 {finding.cve}
+              </span>
+            )}
+            {finding.regulation && (
+              <span className="text-xs font-medium text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 shadow-2xs">
+                🏛️ Violated: {finding.regulation}
+              </span>
+            )}
           </div>
           <p className="text-sm font-medium text-navy-950 mt-1">{finding.title}</p>
         </div>
