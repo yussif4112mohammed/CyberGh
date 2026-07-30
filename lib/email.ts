@@ -1,11 +1,14 @@
 import { ScanResult } from '@/types/scan';
+import nodemailer from 'nodemailer';
 
-// Lazy initialization — don't crash if RESEND_API_KEY is missing
-function getResend() {
-  if (!process.env.RESEND_API_KEY) return null;
-  const { Resend } = require('resend');
-  return new Resend(process.env.RESEND_API_KEY);
-}
+// Initialize Nodemailer Transport
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_EMAIL,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: '#C8102E',
@@ -253,21 +256,17 @@ export async function sendReportEmail(
   scanId: string
 ): Promise<boolean> {
   try {
-    const resend = getResend();
-    if (!resend) {
-      console.log('Email skipped — RESEND_API_KEY not set');
+    if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+      console.log('Email skipped — GMAIL credentials not set');
       return false;
     }
 
     const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault-gh.vercel.app'}/report/${scanId}`;
     const scoreLabel = getScoreLabel(result.score);
-    const toEmail = process.env.RESEND_TEST_MODE === 'true'
-      ? (process.env.RESEND_VERIFIED_EMAIL || email)
-      : email;
 
-    await resend.emails.send({
-      from: 'ScanVault <onboarding@resend.dev>',
-      to: toEmail,
+    await transporter.sendMail({
+      from: `"ScanVault" <${process.env.GMAIL_EMAIL}>`,
+      to: email,
       subject: `Your security report for ${result.domain} — Score: ${result.score}/100 (${scoreLabel})`,
       html: buildReportEmail(result, reportUrl),
     });
@@ -403,9 +402,9 @@ export async function sendMonitoringAlertEmail(
 </html>
     `;
 
-    await resend.emails.send({
-      from: 'ScanVault <onboarding@resend.dev>',
-      to: toEmail,
+    await transporter.sendMail({
+      from: `"ScanVault" <${process.env.GMAIL_EMAIL}>`,
+      to: email,
       subject: `ScanVault Security Alert: ${domain} score updated (${scoreSign}${scoreDelta} pts)`,
       html,
     });
@@ -413,6 +412,45 @@ export async function sendMonitoringAlertEmail(
     return true;
   } catch (err) {
     console.error('Monitoring email failed:', err);
+    return false;
+  }
+}
+
+export async function sendVerificationEmail(
+  email: string,
+  token: string
+): Promise<boolean> {
+  try {
+    if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+      console.log('Verification email skipped — GMAIL credentials not set');
+      return false;
+    }
+
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify?token=${token}`;
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<body style="background: #F4F6FA; font-family: -apple-system, sans-serif; padding: 40px 20px;">
+  <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; text-align: center;">
+    <h2 style="color: #0A1628;">Verify your email</h2>
+    <p style="color: #6B7280; margin-bottom: 24px;">Welcome to ScanVault! Click the button below to verify your email address and activate your account.</p>
+    <a href="${verifyUrl}" style="background: #C8102E; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Verify Email</a>
+  </div>
+</body>
+</html>
+    `;
+
+    await transporter.sendMail({
+      from: `"ScanVault" <${process.env.GMAIL_EMAIL}>`,
+      to: email,
+      subject: `Verify your ScanVault Account`,
+      html,
+    });
+
+    return true;
+  } catch (err) {
+    console.error('Verification email failed:', err);
     return false;
   }
 }

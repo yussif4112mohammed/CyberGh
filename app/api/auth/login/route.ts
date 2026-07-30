@@ -20,12 +20,16 @@ export async function POST(req: NextRequest) {
 
     // Look up the user
     const user = await queryOne(
-      'SELECT id, email, password_hash, name, company, plan FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, name, company, plan, is_verified FROM users WHERE email = $1',
       [trimmedEmail]
     );
 
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 400 });
+    }
+
+    if (!user.is_verified) {
+      return NextResponse.json({ error: 'Please verify your email before logging in. Check your inbox.' }, { status: 403 });
     }
 
     // Verify password

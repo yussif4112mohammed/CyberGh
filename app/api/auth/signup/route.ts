@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { queryOne, execute } from '@/lib/db';
+import { sendVerificationEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,11 +34,17 @@ export async function POST(req: NextRequest) {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     // Insert new user into database
     await execute(
-      'INSERT INTO users (email, password_hash, name, company, plan) VALUES (?, ?, ?, ?, ?)',
-      [trimmedEmail, passwordHash, name?.trim() || null, company?.trim() || null, 'free']
+      'INSERT INTO users (email, password_hash, name, company, plan, is_verified, verification_token) VALUES (?, ?, ?, ?, ?, false, ?)',
+      [trimmedEmail, passwordHash, name?.trim() || null, company?.trim() || null, 'free', verificationToken]
     );
+
+    // Send the verification email using Nodemailer
+    await sendVerificationEmail(trimmedEmail, verificationToken);
 
     return NextResponse.json({ success: true, message: 'Account created successfully' });
   } catch (err: any) {
