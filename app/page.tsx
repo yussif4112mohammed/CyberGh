@@ -175,8 +175,35 @@ export default function HomePage() {
             </p>
 
             {/* ── The scan input ── */}
-            <form onSubmit={startScan} className="max-w-xl mx-auto">
-              {/* Tab switcher */}
+            {scanning ? (
+              <div className="max-w-xl mx-auto bg-white rounded-3xl p-10 border border-navy-100 shadow-2xl flex flex-col items-center justify-center min-h-[360px] animate-in fade-in zoom-in duration-500 relative overflow-hidden">
+                {/* Simulated Progress Bar */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-50">
+                  <div className="h-full bg-ghana-red transition-all duration-1000 ease-out" style={{ width: `${Math.max(10, Math.random() * 80)}%` }}></div>
+                </div>
+                
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-ghana-red/20 rounded-full animate-ping" style={{ animationDuration: '2s' }}></div>
+                  <div className="relative bg-navy-50 rounded-full p-5 border border-navy-100 shadow-inner">
+                    <Shield className="w-12 h-12 text-ghana-red animate-pulse" />
+                  </div>
+                </div>
+                
+                <h3 className="font-display font-bold text-2xl text-navy-950 mb-4 text-center">
+                  Analyzing {inputMode === 'domain' ? domain : businessName}
+                </h3>
+                
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-3 text-sm font-medium text-navy-950 bg-navy-50 px-5 py-2.5 rounded-full border border-navy-100 shadow-sm">
+                    <Loader2 className="w-4 h-4 animate-spin text-ghana-red" />
+                    <span className="min-w-[260px] text-center transition-all duration-300">{currentCheck || 'Initializing scan engine...'}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 font-mono">This usually takes about 15 seconds</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={startScan} className="max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Tab switcher */}
               <div className="flex bg-navy-100 rounded-xl p-1 mb-3">
                 <button
                   type="button"
@@ -317,24 +344,11 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Live progress */}
-              {scanning && (
-                <div className="mt-4 bg-navy-950 rounded-xl p-4 text-left">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-green-400 text-xs font-mono">Scan running...</span>
-                  </div>
-                  <p className="text-green-300 text-sm font-mono">{currentCheck}</p>
-                  <div className="mt-3 h-1 bg-navy-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-400 rounded-full animate-pulse" style={{ width: '60%' }} />
-                  </div>
-                </div>
-              )}
-
               {error && (
                 <p className="mt-3 text-red-600 text-sm text-center">{error}</p>
               )}
             </form>
+            )}
 
             <p className="text-xs text-gray-400 mt-4">
               Free • No signup required • Plain language results
