@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Download, RefreshCw, Loader2, Mail, CheckCircle, ExternalLink, Copy, Check, FileText, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ScoreGauge from '@/components/ScoreGauge';
@@ -20,6 +20,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function ReportPage() {
   const { scanId } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [result, setResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,6 +37,13 @@ export default function ReportPage() {
   const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
   const [wlConfig, setWlConfig] = useState({ agency: '', client: '', logo: '' });
   const [isWhiteLabel, setIsWhiteLabel] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('unlocked') === 'true') {
+      setShowFullReport(true);
+      setEmailSaved(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetch('/api/auth/me')

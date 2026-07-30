@@ -85,10 +85,10 @@ function buildReportEmail(result: ScanResult, reportUrl: string): string {
                 <tr>
                   <td>
                     <span style="font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px;">
-                      Cyber<span style="color: #C8102E;">GH</span>
+                      Scan<span style="color: #C8102E;">Vault</span>
                     </span>
                     <div style="color: #94A3B8; font-size: 11px; margin-top: 2px; letter-spacing: 1px;">
-                      SECURITY FOR EVERY GHANAIAN BUSINESS
+                      AUTOMATED VULNERABILITY ENGINE
                     </div>
                   </td>
                   <td align="right">
@@ -119,23 +119,16 @@ function buildReportEmail(result: ScanResult, reportUrl: string): string {
                     </div>
                   </td>
                   <td align="right" style="vertical-align: top;">
-                    <div style="
-                      width: 80px;
-                      height: 80px;
-                      border-radius: 50%;
-                      border: 6px solid ${scoreColor};
-                      display: inline-flex;
-                      align-items: center;
-                      justify-content: center;
-                      text-align: center;
-                    ">
-                      <div>
-                        <div style="font-size: 24px; font-weight: 800; color: ${scoreColor}; line-height: 1;">
-                          ${result.score}
-                        </div>
-                        <div style="font-size: 10px; color: #6B7280;">/ 100</div>
-                      </div>
-                    </div>
+                    <table width="80" height="80" cellpadding="0" cellspacing="0" style="border-radius: 50%; border: 6px solid ${scoreColor}; margin: 0; display: inline-block;">
+                      <tr>
+                        <td align="center" valign="middle" style="height: 80px; width: 80px;">
+                          <div style="font-size: 24px; font-weight: 800; color: ${scoreColor}; line-height: 1;">
+                            ${result.score}
+                          </div>
+                          <div style="font-size: 10px; color: #6B7280; margin-top: 4px;">/ 100</div>
+                        </td>
+                      </tr>
+                    </table>
                     <div style="font-weight: 700; color: ${scoreColor}; font-size: 13px; margin-top: 4px; text-align: center;">
                       ${scoreLabel}
                     </div>
@@ -261,7 +254,7 @@ export async function sendReportEmail(
       return false;
     }
 
-    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault-gh.vercel.app'}/report/${scanId}`;
+    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault-gh.vercel.app'}/report/${scanId}?unlocked=true`;
     const scoreLabel = getScoreLabel(result.score);
 
     await transporter.sendMail({
@@ -288,13 +281,12 @@ export async function sendMonitoringAlertEmail(
   newIssues: string[]
 ): Promise<boolean> {
   try {
-    const resend = getResend();
-    if (!resend) {
-      console.log('Email skipped — RESEND_API_KEY not set');
+    if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+      console.log('Email skipped — GMAIL credentials not set');
       return false;
     }
 
-    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault-gh.vercel.app'}/report/${scanId}`;
+    const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://scanvault-gh.vercel.app'}/report/${scanId}?unlocked=true`;
     const scoreDelta = newScore - prevScore;
     const scoreColor = scoreDelta > 0 ? '#2E7D32' : scoreDelta < 0 ? '#C8102E' : '#6B7280';
     const scoreSign = scoreDelta > 0 ? '+' : '';
