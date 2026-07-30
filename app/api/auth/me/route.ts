@@ -6,6 +6,7 @@ import { queryOne } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'scanvault_fallback_secret_key_123';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'yussif4112@gmail.com').split(',').map(e => e.trim().toLowerCase());
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,7 +37,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ user: null });
     }
 
-    return NextResponse.json({ user });
+    const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+
+    return NextResponse.json({ user: { ...user, isAdmin } });
   } catch (err) {
     console.error('Me endpoint error:', err);
     return NextResponse.json({ user: null });

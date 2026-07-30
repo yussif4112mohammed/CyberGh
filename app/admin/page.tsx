@@ -120,11 +120,8 @@ export default function AdminPage() {
     setCronRunning(true);
     setCronResult('');
     try {
-      const res = await fetch('/api/monitor/cron', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer scanvault_cron_secret_auth_token_987654_xyz'
-        }
+      const res = await fetch('/api/admin/run-cron', {
+        method: 'POST'
       });
       const data = await res.json();
       if (res.ok) {

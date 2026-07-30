@@ -9,6 +9,7 @@ interface User {
   name: string | null;
   company: string | null;
   plan: string;
+  isAdmin?: boolean;
 }
 
 export default function Navbar() {
@@ -65,6 +66,11 @@ export default function Navbar() {
               <Link href="/dashboard" className="text-sm font-semibold text-navy-950 hover:text-navy-700 transition-colors">
                 Dashboard
               </Link>
+              {user.isAdmin && (
+                <Link href="/admin" className="text-sm font-semibold text-ghana-red hover:text-red-700 transition-colors flex items-center gap-1">
+                  Admin Panel
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
