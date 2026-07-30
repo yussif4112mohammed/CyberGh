@@ -4,7 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
-export default function VerifyPage() {
+import { Suspense } from 'react';
+
+function VerifyContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -74,5 +76,13 @@ export default function VerifyPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-900"></div></div>}>
+      <VerifyContent />
+    </Suspense>
   );
 }

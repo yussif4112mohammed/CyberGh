@@ -17,7 +17,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   fingerprint: 'Tech Stack',
 };
 
-export default function ReportPage() {
+import { Suspense } from 'react';
+
+function ReportContent() {
   const { scanId } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -523,5 +525,13 @@ export default function ReportPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-900"></div></div>}>
+      <ReportContent />
+    </Suspense>
   );
 }
