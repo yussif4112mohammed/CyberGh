@@ -131,7 +131,8 @@ export default function ReportPage() {
   const teaserFindings = result.findings.filter(f => f.severity !== 'pass').slice(0, 3);
   const allFindings = result.findings;
 
-  const handleWhiteLabelPrint = () => {
+  const handleWhiteLabelPrint = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setIsWhiteLabel(true);
     setShowWhiteLabelModal(false);
     setTimeout(() => {
@@ -156,17 +157,17 @@ export default function ReportPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <form onSubmit={handleWhiteLabelPrint} className="p-6 space-y-4">
               <p className="text-sm text-gray-500 mb-2">Generate a clean, unbranded report to share with your clients. ScanVault branding will be completely removed.</p>
               
               <div>
                 <label className="block text-sm font-semibold text-navy-950 mb-1.5">Your Agency Name</label>
-                <input type="text" className="input" placeholder="e.g. CyberTech Security" 
+                <input type="text" required className="input" placeholder="e.g. CyberTech Security" 
                   value={wlConfig.agency} onChange={e => setWlConfig({...wlConfig, agency: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-navy-950 mb-1.5">Client Name (Target)</label>
-                <input type="text" className="input" placeholder={`e.g. ${result.domain}`} 
+                <input type="text" required className="input" placeholder={`e.g. ${result.domain}`} 
                   value={wlConfig.client} onChange={e => setWlConfig({...wlConfig, client: e.target.value})} />
               </div>
               <div>
@@ -175,10 +176,10 @@ export default function ReportPage() {
                   value={wlConfig.logo} onChange={e => setWlConfig({...wlConfig, logo: e.target.value})} />
               </div>
               
-              <button onClick={handleWhiteLabelPrint} className="btn-primary w-full justify-center mt-2">
+              <button type="submit" className="btn-primary w-full justify-center mt-2">
                 Generate White-Label PDF
               </button>
-            </div>
+            </form>
           </div>
         </div>
       )}
