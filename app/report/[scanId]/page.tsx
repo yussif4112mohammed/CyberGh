@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Shield, Download, RefreshCw, Loader2, Mail, CheckCircle, ExternalLink, Copy, Check } from 'lucide-react';
+import { Shield, Download, RefreshCw, Loader2, Mail, CheckCircle, ExternalLink, Copy, Check, FileText, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ScoreGauge from '@/components/ScoreGauge';
 import FindingCard from '@/components/FindingCard';
@@ -31,6 +31,18 @@ export default function ReportPage() {
   const [prevResult, setPrevResult] = useState<ScanResult | null>(null);
   const [rescanLoading, setRescanLoading] = useState(false);
   const [history, setHistory] = useState<Array<{ id: string; score: number; created_at: string }>>([]);
+
+  const [user, setUser] = useState<{ id: number; email: string; plan: string } | null>(null);
+  const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+  const [wlConfig, setWlConfig] = useState({ agency: '', client: '', logo: '' });
+  const [isWhiteLabel, setIsWhiteLabel] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(data => { if (data.user) setUser(data.user); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!scanId) return;
@@ -119,11 +131,87 @@ export default function ReportPage() {
   const teaserFindings = result.findings.filter(f => f.severity !== 'pass').slice(0, 3);
   const allFindings = result.findings;
 
+  const handleWhiteLabelPrint = () => {
+    setIsWhiteLabel(true);
+    setShowWhiteLabelModal(false);
+    setTimeout(() => {
+      window.print();
+      setIsWhiteLabel(false);
+    }, 100);
+  };
+
   return (
     <>
-      <div className="print:hidden"><Navbar /></div>
+      <div className={isWhiteLabel ? "hidden" : "print:hidden"}><Navbar /></div>
+
+      {showWhiteLabelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/40 backdrop-blur-sm print:hidden">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-display font-bold text-lg text-navy-950 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-ghana-red" />
+                White-Label PDF Export
+              </h3>
+              <button onClick={() => setShowWhiteLabelModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-gray-500 mb-2">Generate a clean, unbranded report to share with your clients. ScanVault branding will be completely removed.</p>
+              
+              <div>
+                <label className="block text-sm font-semibold text-navy-950 mb-1.5">Your Agency Name</label>
+                <input type="text" className="input" placeholder="e.g. CyberTech Security" 
+                  value={wlConfig.agency} onChange={e => setWlConfig({...wlConfig, agency: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-navy-950 mb-1.5">Client Name (Target)</label>
+                <input type="text" className="input" placeholder={`e.g. ${result.domain}`} 
+                  value={wlConfig.client} onChange={e => setWlConfig({...wlConfig, client: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-navy-950 mb-1.5">Custom Logo URL <span className="text-gray-400 font-normal">(Optional)</span></label>
+                <input type="url" className="input" placeholder="https://youragency.com/logo.png" 
+                  value={wlConfig.logo} onChange={e => setWlConfig({...wlConfig, logo: e.target.value})} />
+              </div>
+              
+              <button onClick={handleWhiteLabelPrint} className="btn-primary w-full justify-center mt-2">
+                Generate White-Label PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="min-h-screen bg-gray-50 pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-6">
+          
+          {/* White-Label PDF Cover Page (Only visible on print when activated) */}
+          {isWhiteLabel && (
+            <div className="hidden print:flex flex-col items-center justify-center min-h-screen pb-32 text-center" style={{ breakAfter: 'page' }}>
+              {wlConfig.logo && <img src={wlConfig.logo} alt="Agency Logo" className="h-16 mb-8 object-contain" />}
+              <h1 className="font-display font-bold text-5xl text-navy-950 mb-4 tracking-tight">Security Assessment Report</h1>
+              <p className="text-xl text-gray-500 mb-12">Comprehensive Vulnerability & Compliance Audit</p>
+              
+              <div className="card p-8 bg-gray-50 w-full max-w-lg mb-12">
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Prepared For</p>
+                <p className="text-2xl font-bold text-navy-950 mb-6">{wlConfig.client || result.domain}</p>
+                
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Target Domain</p>
+                <p className="text-xl font-medium text-navy-950 mb-6">{result.domain}</p>
+                
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Date of Assessment</p>
+                <p className="text-xl font-medium text-navy-950">{new Date(result.created_at).toLocaleDateString('en-US', { dateStyle: 'long' })}</p>
+              </div>
+              
+              {wlConfig.agency && (
+                <div className="mt-auto">
+                  <p className="text-sm text-gray-400 mb-1">Confidential & Proprietary</p>
+                  <p className="text-sm font-semibold text-navy-950">Prepared by {wlConfig.agency}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Header ── */}
           <div className="card p-6 sm:p-8 mb-6 overflow-hidden">
@@ -187,6 +275,14 @@ export default function ReportPage() {
                 >
                   <Download className="w-3.5 h-3.5" /> Download PDF
                 </button>
+                {user && (
+                  <button
+                    onClick={() => setShowWhiteLabelModal(true)}
+                    className="btn-primary text-xs sm:text-sm py-2 px-3.5 print:hidden flex-1 sm:flex-initial justify-center whitespace-nowrap bg-ghana-red border-ghana-red hover:bg-ghana-red/90 text-white"
+                  >
+                    <FileText className="w-3.5 h-3.5" /> White-Label Export
+                  </button>
+                )}
                 <button
                   onClick={handleRescan}
                   disabled={rescanLoading}
