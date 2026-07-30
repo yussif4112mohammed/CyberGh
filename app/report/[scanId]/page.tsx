@@ -215,12 +215,12 @@ export default function ReportPage() {
 
           {/* ── Header ── */}
           <div className="card p-6 sm:p-8 mb-6 overflow-hidden">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1 min-w-0 w-full">
                 <ScoreGauge score={result.score} size="lg" />
                 <div className="flex-1 min-w-0 w-full">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Security Report</p>
-                  <h1 className="font-display font-bold text-2xl sm:text-3xl text-navy-950 mb-1 break-words truncate">
+                  <h1 className="font-display font-bold text-2xl sm:text-3xl text-navy-950 mb-1 break-words leading-tight">
                     {result.domain}
                   </h1>
                   <p className="text-sm text-gray-400 mb-4">
@@ -255,7 +255,7 @@ export default function ReportPage() {
               </div>
 
               {/* Action buttons */}
-              <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-gray-100 flex-shrink-0">
+              <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto pt-4 xl:pt-0 border-t xl:border-t-0 border-gray-100 flex-shrink-0">
                 <button
                   id="share-report-btn"
                   onClick={() => {
