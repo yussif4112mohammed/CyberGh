@@ -86,12 +86,11 @@ export default function FindingCard({ finding, index }: FindingCardProps) {
           </div>
           <p className="text-sm font-medium text-navy-950 mt-1">{finding.title}</p>
         </div>
-        {expanded ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+        {expanded ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0 print:hidden" /> : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0 print:hidden" />}
       </button>
 
-      {expanded && (
-        <div className="px-4 pb-4 pl-11 space-y-3">
-          <p className="text-sm text-gray-700 leading-relaxed">{finding.description}</p>
+      <div className={`px-4 pb-4 pl-11 space-y-3 ${expanded ? 'block' : 'hidden print:block'}`}>
+        <p className="text-sm text-gray-700 leading-relaxed">{finding.description}</p>
           {finding.fix && (
             <div className="bg-white rounded-lg p-3 border border-gray-100">
               <p className="text-xs font-semibold text-navy-950 mb-1">How to fix this</p>
@@ -124,7 +123,6 @@ export default function FindingCard({ finding, index }: FindingCardProps) {
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }

@@ -52,7 +52,6 @@
   /* Hide interactive elements */
   nav,
   .print\:hidden,
-  button,
   form {
     display: none !important;
   }
