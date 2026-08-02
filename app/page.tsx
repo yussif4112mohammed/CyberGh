@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Search, Loader2, AlertTriangle, Lock, Globe, Mail, Server, Database } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 
 const CHECKS_DISPLAY = [
@@ -509,22 +510,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Footer ──────────────────────────────────────────── */}
-        <footer className="py-10 px-6 border-t border-white/10">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-teal-gradient rounded flex items-center justify-center">
-                <Shield className="w-3 h-3 text-white" />
-              </div>
-              <span className="font-semibold text-white">ScanVault</span>
-            </div>
-            <p>Securing African businesses 🌍</p>
-            <div className="flex gap-4">
-              <a href="/privacy" className="hover:text-teal-400 transition-colors">Privacy</a>
-              <a href="/terms" className="hover:text-teal-400 transition-colors">Terms</a>
-              <a href="/contact" className="hover:text-teal-400 transition-colors">Contact</a>
-            </div>
-          </div>
-        </footer>
+        <Footer />
 
       </main>
     </>
