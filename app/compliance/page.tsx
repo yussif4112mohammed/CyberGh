@@ -228,16 +228,6 @@ export default function CompliancePage() {
   const [scanDomain, setScanDomain] = useState('');
   const [prefilled, setPrefilled] = useState(false);
 
-  // ── Scroll-triggered animations ──────────────────────────────
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-      { threshold: 0.12 }
-    );
-    document.querySelectorAll('.fade-up, .slide-left, .slide-right, .stagger > *').forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
   const currentFramework = CHECKS_BY_COUNTRY[country];
   const checks = currentFramework.checks;
 
@@ -295,10 +285,10 @@ export default function CompliancePage() {
         <div className="glow-orb-teal w-[500px] h-[500px] -top-64 -left-64 orb-float-a opacity-50" />
         <div className="glow-orb-blue w-[400px] h-[400px] top-48 -right-48 orb-float-b opacity-30" />
 
-        <div className="max-w-3xl mx-auto px-6 relative z-10">
+        <div className="max-w-3xl mx-auto px-6 relative z-10 animate-in fade-in duration-700 slide-in-from-bottom-4">
 
           {/* Header */}
-          <div className="text-center mb-10 fade-up">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-teal-500/10 text-teal-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-4 border border-teal-500/20">
               <Shield className="w-3.5 h-3.5" />
               Pan-African Compliance Readiness
@@ -333,14 +323,14 @@ export default function CompliancePage() {
             </div>
           </div>
 
-          <div className="text-center mb-8 fade-up">
+          <div className="text-center mb-8">
             <span className="text-teal-300 text-sm font-medium">Currently testing against: </span>
             <span className="text-white font-bold bg-white/10 px-3 py-1 rounded-md text-sm ml-2 border border-white/10 shadow-sm">{currentFramework.frameworks}</span>
           </div>
 
           {/* Pre-fill Banner */}
           {prefilled && (
-            <div className="card-teal bg-teal-500/10 border-l-4 border-l-teal-500 border-y-white/10 border-r-white/10 p-5 mb-6 flex items-start gap-3 backdrop-blur-sm fade-up">
+            <div className="card-teal bg-teal-500/10 border-l-4 border-l-teal-500 border-y-white/10 border-r-white/10 p-5 mb-6 flex items-start gap-3 backdrop-blur-sm">
               <Shield className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-white text-sm">Answers Pre-filled</h3>
@@ -352,7 +342,7 @@ export default function CompliancePage() {
           )}
 
           {/* Progress */}
-          <div className="card-teal bg-white/5 border border-white/10 p-5 mb-6 backdrop-blur-md fade-up">
+          <div className="card-teal bg-white/5 border border-white/10 p-5 mb-6 backdrop-blur-md">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-white">{answered} of {total} answered</span>
               {answered > 0 && (
@@ -370,13 +360,13 @@ export default function CompliancePage() {
           </div>
 
           {/* Questions */}
-          <div className="space-y-4 mb-12 stagger">
+          <div className="space-y-4 mb-12">
             {checks.map((check, i) => {
               const ans = answers[check.id];
               const isExpanded = expanded === check.id;
 
               return (
-                <div key={check.id} className={`fade-up card-teal bg-white/5 overflow-hidden border-l-4 backdrop-blur-sm transition-all duration-300 ${
+                <div key={check.id} className={`card-teal bg-white/5 overflow-hidden border-l-4 backdrop-blur-sm transition-all duration-300 ${
                   ans === true ? 'border-l-teal-400 border-y-white/10 border-r-white/10' :
                   ans === false ? 'border-l-red-400 border-y-white/10 border-r-white/10 bg-red-950/20' :
                   'border-l-white/10 border-y-white/10 border-r-white/10 hover:bg-white/10'

@@ -93,16 +93,6 @@ const PENTEST = {
 export default function PricingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  // ── Scroll-triggered animations ──────────────────────────────
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-      { threshold: 0.12 }
-    );
-    document.querySelectorAll('.fade-up, .slide-left, .slide-right, .stagger > *').forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
   const handleCheckout = async (planId: string) => {
     setLoadingPlan(planId);
     try {
@@ -142,9 +132,9 @@ export default function PricingPage() {
         <div className="glow-orb-teal w-96 h-96 -top-48 -left-48 orb-float-a" />
         <div className="glow-orb-blue w-96 h-96 -top-48 -right-48 orb-float-b" />
 
-        <div className="max-w-5xl mx-auto px-6 relative">
+        <div className="max-w-5xl mx-auto px-6 relative z-10 animate-in fade-in duration-700 slide-in-from-bottom-4">
 
-          <div className="text-center mb-12 fade-up">
+          <div className="text-center mb-12">
             <h1 className="font-display font-bold text-4xl text-white mb-3">
               Simple, transparent pricing
             </h1>
@@ -154,9 +144,9 @@ export default function PricingPage() {
           </div>
 
           {/* Plans */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 stagger">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {PLANS.map(plan => (
-              <div key={plan.name} className={`fade-up rounded-2xl p-6 border ${plan.color} backdrop-blur-sm relative hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}>
+              <div key={plan.name} className={`rounded-2xl p-6 border ${plan.color} backdrop-blur-sm relative hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}>
                 <div>
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -214,7 +204,7 @@ export default function PricingPage() {
           </div>
 
           {/* Pentest */}
-          <div className="fade-up rounded-3xl p-8 bg-white/5 border border-white/10 backdrop-blur-sm text-white mb-10 relative overflow-hidden">
+          <div className="rounded-3xl p-8 bg-white/5 border border-white/10 backdrop-blur-sm text-white mb-10 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-teal-gradient opacity-30"></div>
             <div className="flex flex-col sm:flex-row gap-6 items-start">
               <div className="flex-1">
@@ -239,7 +229,7 @@ export default function PricingPage() {
           </div>
 
           {/* FAQ */}
-          <div className="text-center fade-up pb-8">
+          <div className="text-center pb-8">
             <p className="text-gray-400 text-sm">
               Questions? WhatsApp us or{' '}
               <a href="/contact" className="text-teal-400 font-medium hover:underline">send a message</a>.
