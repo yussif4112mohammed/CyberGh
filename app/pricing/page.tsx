@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, Shield, Zap, Building, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
@@ -7,20 +7,20 @@ const PLANS = [
   {
     id: 'free',
     name: 'Free',
-    price: 'GHS 0',
+    price: '$0',
     period: '',
     description: 'For any business wanting to know where they stand',
     icon: Shield,
-    color: 'border-gray-200',
+    color: 'border-white/10 bg-white/5',
     cta: 'Start Free Scan',
     ctaHref: '/',
-    ctaStyle: 'btn-outline',
+    ctaStyle: 'btn-outline border-white/20 text-white hover:bg-white/10',
     features: [
       'One-time website security scan',
       '12-point security check',
       'Plain-language findings report',
       'Fix instructions for every issue',
-      'Ghana compliance score',
+      'Regional compliance score',
     ],
     missing: [
       'Continuous monitoring',
@@ -32,11 +32,11 @@ const PLANS = [
   {
     id: 'starter',
     name: 'Starter',
-    price: 'GHS 250',
+    price: '$15',
     period: '/month',
     description: 'For small businesses serious about protecting customer data',
     icon: Zap,
-    color: 'border-ghana-red',
+    color: 'border-teal-500/50 bg-teal-500/5 shadow-[0_0_15px_rgba(20,184,166,0.15)]',
     badge: 'Most Popular',
     cta: 'Get Started',
     ctaStyle: 'btn-primary',
@@ -47,7 +47,7 @@ const PLANS = [
       'SSL expiry warnings (14 days ahead)',
       'Weekly staff security tip emails',
       'Monthly security summary PDF',
-      'Ghana compliance checklist',
+      'Regional compliance checklist',
       'Email support',
     ],
     missing: [],
@@ -55,13 +55,13 @@ const PLANS = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 'GHS 600',
+    price: '$40',
     period: '/month',
     description: 'For businesses needing deeper security and compliance evidence',
     icon: Building,
-    color: 'border-navy-700',
+    color: 'border-white/10 bg-white/5',
     cta: 'Upgrade to Pro',
-    ctaStyle: 'btn-secondary',
+    ctaStyle: 'bg-white/10 text-white hover:bg-white/20 font-semibold transition-all',
     features: [
       'Everything in Starter',
       'Extended domain limits (up to 10 sites)',
@@ -78,7 +78,7 @@ const PLANS = [
 
 const PENTEST = {
   name: 'Manual Penetration Test',
-  price: 'GHS 2,000 – 8,000',
+  price: '$200 – $600',
   description: 'A human expert manually tests your systems — the gold standard for compliance evidence, investor due diligence, or after a security incident.',
   features: [
     'Full manual pentest by a certified professional',
@@ -92,6 +92,16 @@ const PENTEST = {
 
 export default function PricingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // ── Scroll-triggered animations ──────────────────────────────
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('.fade-up, .slide-left, .slide-right, .stagger > *').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const handleCheckout = async (planId: string) => {
     setLoadingPlan(planId);
@@ -126,105 +136,113 @@ export default function PricingPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50 pt-24 pb-16">
-        <div className="max-w-5xl mx-auto px-6">
+      <main className="min-h-screen bg-navy-950 relative overflow-hidden pt-24 pb-16">
+        
+        {/* Glow Orbs */}
+        <div className="glow-orb-teal w-96 h-96 -top-48 -left-48 orb-float-a" />
+        <div className="glow-orb-blue w-96 h-96 -top-48 -right-48 orb-float-b" />
 
-          <div className="text-center mb-12">
-            <h1 className="font-display font-bold text-4xl text-navy-950 mb-3">
+        <div className="max-w-5xl mx-auto px-6 relative">
+
+          <div className="text-center mb-12 fade-up">
+            <h1 className="font-display font-bold text-4xl text-white mb-3">
               Simple, transparent pricing
             </h1>
-            <p className="text-gray-500 text-lg">
-              Built for Ghanaian business budgets. No hidden fees, cancel anytime.
+            <p className="text-gray-400 text-lg">
+              Built for African business budgets. No hidden fees, cancel anytime.
             </p>
           </div>
 
           {/* Plans */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 stagger">
             {PLANS.map(plan => (
-              <div key={plan.name} className={`card p-6 border-2 ${plan.color} relative hover:scale-[1.02] hover:shadow-card-hover transition-all duration-300 flex flex-col justify-between`}>
+              <div key={plan.name} className={`fade-up rounded-2xl p-6 border ${plan.color} backdrop-blur-sm relative hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}>
                 <div>
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-ghana-red text-white text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-teal-gradient text-white shadow-teal-sm text-xs font-bold px-3 py-1 rounded-full">
                         {plan.badge}
                       </span>
                     </div>
                   )}
-                  <plan.icon className="w-7 h-7 text-navy-700 mb-3" />
-                  <h2 className="font-display font-bold text-xl text-navy-950 mb-0.5">{plan.name}</h2>
-                  <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
-                  <div className="mb-5">
-                    <span className="font-display font-bold text-3xl text-navy-950">{plan.price}</span>
-                    <span className="text-gray-400 text-sm">{plan.period}</span>
+                  <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center mb-4 border border-white/10">
+                    <plan.icon className={`w-6 h-6 ${plan.id === 'starter' ? 'text-teal-400' : 'text-gray-300'}`} />
+                  </div>
+                  <h2 className="font-display font-bold text-xl text-white mb-0.5">{plan.name}</h2>
+                  <p className="text-gray-400 text-sm mb-4 min-h-[40px]">{plan.description}</p>
+                  <div className="mb-6 pb-6 border-b border-white/10">
+                    <span className="font-display font-bold text-4xl text-white">{plan.price}</span>
+                    <span className="text-gray-500 text-sm">{plan.period}</span>
                   </div>
 
-                  {plan.id === 'free' ? (
-                    <a href={plan.ctaHref} className={`${plan.ctaStyle} w-full justify-center mb-6`}>
-                      {plan.cta}
-                    </a>
-                  ) : (
-                    <button
-                      onClick={() => handleCheckout(plan.id)}
-                      disabled={loadingPlan !== null}
-                      className={`${plan.ctaStyle} w-full justify-center mb-6 py-2.5 rounded-xl`}
-                    >
-                      {loadingPlan === plan.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-                      ) : null}
-                      {loadingPlan === plan.id ? 'Connecting...' : plan.cta}
-                    </button>
-                  )}
-
-                  <ul className="space-y-2.5">
+                  <ul className="space-y-3 mb-8">
                     {plan.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
-                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                        <CheckCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.id === 'starter' ? 'text-teal-400' : 'text-gray-500'}`} />
                         {f}
                       </li>
                     ))}
                     {plan.missing.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-gray-400">
+                      <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
                         <div className="w-4 h-4 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                          <div className="w-3 h-px bg-gray-300" />
+                          <div className="w-3 h-px bg-gray-700" />
                         </div>
                         {f}
                       </li>
                     ))}
                   </ul>
                 </div>
+                
+                {plan.id === 'free' ? (
+                  <a href={plan.ctaHref} className={`w-full text-center py-3 rounded-xl flex items-center justify-center ${plan.ctaStyle}`}>
+                    {plan.cta}
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => handleCheckout(plan.id)}
+                    disabled={loadingPlan !== null}
+                    className={`w-full text-center py-3 rounded-xl flex items-center justify-center ${plan.ctaStyle}`}
+                  >
+                    {loadingPlan === plan.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                    ) : null}
+                    {loadingPlan === plan.id ? 'Connecting...' : plan.cta}
+                  </button>
+                )}
               </div>
             ))}
           </div>
 
           {/* Pentest */}
-          <div className="card p-8 bg-navy-950 text-white mb-10">
+          <div className="fade-up rounded-3xl p-8 bg-white/5 border border-white/10 backdrop-blur-sm text-white mb-10 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-teal-gradient opacity-30"></div>
             <div className="flex flex-col sm:flex-row gap-6 items-start">
               <div className="flex-1">
-                <div className="text-xs font-semibold text-ghana-red mb-2 uppercase tracking-wider">Add-on Service</div>
+                <div className="text-xs font-semibold text-teal-400 mb-2 uppercase tracking-wider">Enterprise Add-on Service</div>
                 <h2 className="font-display font-bold text-2xl mb-2">{PENTEST.name}</h2>
-                <p className="text-gray-300 text-sm mb-4">{PENTEST.description}</p>
-                <ul className="space-y-2">
+                <p className="text-gray-400 text-sm mb-5 max-w-2xl">{PENTEST.description}</p>
+                <div className="grid sm:grid-cols-2 gap-3">
                   {PENTEST.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
-                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <div key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                      <CheckCircle className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
                       {f}
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
-              <div className="text-center sm:text-right flex-shrink-0">
-                <div className="font-display font-bold text-2xl text-white mb-1">{PENTEST.price}</div>
-                <p className="text-gray-400 text-sm mb-4">per engagement</p>
-                <a href="/contact" className="btn-primary">Request a Quote</a>
+              <div className="text-left sm:text-right flex-shrink-0 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-white/10 w-full sm:w-auto">
+                <div className="font-display font-bold text-3xl text-white mb-1">{PENTEST.price}</div>
+                <p className="text-gray-500 text-sm mb-5">per engagement</p>
+                <a href="/contact" className="btn-outline border-white text-white hover:bg-white hover:text-navy-950 px-6">Request a Quote</a>
               </div>
             </div>
           </div>
 
           {/* FAQ */}
-          <div className="text-center">
-            <p className="text-gray-500 text-sm">
+          <div className="text-center fade-up pb-8">
+            <p className="text-gray-400 text-sm">
               Questions? WhatsApp us or{' '}
-              <a href="/contact" className="text-navy-700 font-medium hover:underline">send a message</a>.
+              <a href="/contact" className="text-teal-400 font-medium hover:underline">send a message</a>.
               We respond within 24 hours.
             </p>
           </div>

@@ -1,48 +1,168 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  html { font-family: 'Inter', sans-serif; }
-  body { @apply bg-white text-navy-950 antialiased; }
+  html { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+  body { @apply bg-navy-950 text-white antialiased; }
+  h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
 }
 
 @layer components {
+
+  /* ── Buttons ─────────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-6 py-3 bg-ghana-red text-white font-semibold
-           rounded-xl hover:bg-red-700 transition-all duration-200 shadow-sm
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+           bg-teal-gradient text-white shadow-teal-sm
+           hover:shadow-teal-glow hover:scale-[1.02] active:scale-[0.98];
   }
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-6 py-3 bg-navy-950 text-white font-semibold
-           rounded-xl hover:bg-navy-800 transition-all duration-200;
+    @apply inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl
+           bg-white/10 text-white border border-white/20 backdrop-blur-sm
+           hover:bg-white/20 hover:border-teal-400/50 transition-all duration-200;
   }
   .btn-outline {
-    @apply inline-flex items-center gap-2 px-6 py-3 border-2 border-navy-950 text-navy-950
-           font-semibold rounded-xl hover:bg-navy-50 transition-all duration-200;
+    @apply inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl
+           border-2 border-teal-600 text-teal-400
+           hover:bg-teal-600/10 hover:border-teal-400 transition-all duration-200;
   }
+
+  /* ── Glass Card ──────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl shadow-card border border-navy-100;
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-glass;
   }
+  .card-teal {
+    @apply rounded-2xl border border-teal-500/30 bg-glass-gradient backdrop-blur-sm shadow-glass
+           hover:border-teal-400/50 hover:shadow-teal-glow transition-all duration-300;
+  }
+
+  /* ── Inputs ──────────────────────────────────────────── */
   .input {
-    @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-navy-950
-           focus:outline-none focus:ring-2 focus:ring-navy-700 focus:border-transparent
-           placeholder:text-gray-400 transition-all;
+    @apply w-full px-4 py-3 rounded-xl text-white
+           bg-white/5 border border-white/10 backdrop-blur-sm
+           focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50
+           placeholder:text-gray-500 transition-all duration-200;
   }
-  .severity-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+
+  /* ── Severity badges (keep as is for reports) ─────── */
+  .severity-badge    { @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold; }
+  .severity-critical { @apply severity-badge bg-red-500/20 text-red-400 border border-red-500/30; }
+  .severity-high     { @apply severity-badge bg-orange-500/20 text-orange-400 border border-orange-500/30; }
+  .severity-medium   { @apply severity-badge bg-amber-500/20 text-amber-400 border border-amber-500/30; }
+  .severity-low      { @apply severity-badge bg-blue-500/20 text-blue-400 border border-blue-500/30; }
+  .severity-info     { @apply severity-badge bg-gray-500/20 text-gray-400 border border-gray-500/30; }
+  .severity-pass     { @apply severity-badge bg-teal-500/20 text-teal-400 border border-teal-500/30; }
+
+  /* ── Glow Orb Backgrounds ──────────────────────────── */
+  .glow-orb {
+    @apply absolute rounded-full blur-3xl opacity-20 pointer-events-none;
   }
-  .severity-critical { @apply severity-badge bg-red-50 text-red-700; }
-  .severity-high     { @apply severity-badge bg-orange-50 text-orange-700; }
-  .severity-medium   { @apply severity-badge bg-amber-50 text-amber-700; }
-  .severity-low      { @apply severity-badge bg-blue-50 text-blue-700; }
-  .severity-info     { @apply severity-badge bg-gray-100 text-gray-600; }
-  .severity-pass     { @apply severity-badge bg-green-50 text-green-700; }
+  .glow-orb-teal  { @apply glow-orb bg-teal-500; }
+  .glow-orb-blue  { @apply glow-orb bg-blue-600; }
 }
 
+/* ── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: #0a1628; }
+::-webkit-scrollbar-thumb { background: #0f766e; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #14b8a6; }
+
+/* ── Animations ─────────────────────────────────────────── */
+
+/* Fade up — triggered by JS adding .visible */
+.fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered children */
+.stagger > *:nth-child(1) { transition-delay: 0ms;   }
+.stagger > *:nth-child(2) { transition-delay: 80ms;  }
+.stagger > *:nth-child(3) { transition-delay: 160ms; }
+.stagger > *:nth-child(4) { transition-delay: 240ms; }
+.stagger > *:nth-child(5) { transition-delay: 320ms; }
+.stagger > *:nth-child(6) { transition-delay: 400ms; }
+
+/* Floating glow orbs */
+@keyframes floatA {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, -30px) scale(1.05); }
+  66%       { transform: translate(-15px, 20px) scale(0.97); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-25px, 20px) scale(1.08); }
+  70%       { transform: translate(10px, -25px) scale(0.95); }
+}
+.orb-float-a { animation: floatA 12s ease-in-out infinite; }
+.orb-float-b { animation: floatB 15s ease-in-out infinite; }
+
+/* Teal border glow on hover for cards */
+.card-teal {
+  position: relative;
+  overflow: hidden;
+}
+.card-teal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(20,184,166,0.08) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.card-teal:hover::before { opacity: 1; }
+
+/* Shimmer sweep on scan button */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.btn-primary {
+  background-size: 200% auto;
+  background-image: linear-gradient(
+    135deg,
+    #0f766e 0%,
+    #0369a1 40%,
+    #14b8a6 60%,
+    #0f766e 100%
+  );
+  animation: shimmer 4s linear infinite;
+}
+
+/* Teal scan pulse ring */
+@keyframes scanPulse {
+  0%   { transform: scale(0.8); opacity: 0.8; }
+  50%  { transform: scale(1.2); opacity: 0.3; }
+  100% { transform: scale(0.8); opacity: 0.8; }
+}
+.scan-pulse { animation: scanPulse 2.5s ease-in-out infinite; }
+
+/* Typing cursor blink */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.cursor-blink::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: #14b8a6;
+  margin-left: 2px;
+}
+
+/* Slide in from left/right for alternating sections */
+.slide-left  { opacity: 0; transform: translateX(-40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.slide-right { opacity: 0; transform: translateX( 40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.slide-left.visible, .slide-right.visible { opacity: 1; transform: translateX(0); }
+
 /* ── Print / PDF export styles ───────────────────────────────── */
+
 @media print {
   @page {
     size: A4;

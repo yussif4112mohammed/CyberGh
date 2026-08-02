@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Search, Loader2, CheckCircle, AlertTriangle, Lock, Globe, Mail, Server, Database } from 'lucide-react';
+import { Shield, Search, Loader2, AlertTriangle, Lock, Globe, Mail, Server, Database } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+
 
 const CHECKS_DISPLAY = [
   { icon: Lock,     label: 'SSL/TLS Certificate' },
@@ -20,9 +21,9 @@ const CHECKS_DISPLAY = [
 ];
 
 const STATS = [
-  { value: '78%',  label: 'of Ghanaian SMEs have no security policy' },
+  { value: '78%',  label: 'of African SMEs have no security policy' },
   { value: 'GHS 50k+', label: 'average cost of a data breach for SMEs' },
-  { value: '2026', label: 'Bank of Ghana CISD compliance deadline' },
+  { value: '1M+', label: 'businesses across Africa trust our insights' },
 ];
 
 export default function HomePage() {
@@ -37,6 +38,16 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [businessMatches, setBusinessMatches] = useState<Array<{ name: string; domain: string; country: string; flag: string; source: string }>>([]);
   const [authorized, setAuthorized] = useState(false);
+
+  // ── Scroll-triggered animations ──────────────────────────────
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('.fade-up, .slide-left, .slide-right').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const [scanCount, setScanCount] = useState<number | null>(null);
 
@@ -152,23 +163,28 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-navy-950 relative overflow-hidden">
+
+        {/* ── Glow Orbs ─────────────────────────────────────── */}
+        <div className="glow-orb-teal w-96 h-96 -top-48 -left-48 orb-float-a" />
+        <div className="glow-orb-blue w-96 h-96 -top-48 -right-48 orb-float-b" />
+        <div className="glow-orb-teal w-64 h-64 top-1/2 left-1/2 -translate-x-1/2 orb-float-a" style={{opacity:0.08}} />
 
         {/* ── Hero ────────────────────────────────────────────── */}
-        <section className="pt-32 pb-20 px-6">
+        <section className="pt-32 pb-20 px-6 relative">
           <div className="max-w-3xl mx-auto text-center">
 
-            <div className="inline-flex items-center gap-2 bg-red-50 text-ghana-red text-xs font-semibold px-3 py-1.5 rounded-full mb-6 border border-red-100">
+            <div className="fade-up inline-flex items-center gap-2 bg-teal-500/10 text-teal-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-6 border border-teal-500/30">
               <AlertTriangle className="w-3 h-3" />
-              Bank of Ghana CISD 2026 — Is your business compliant?
+              Protecting African businesses from emerging cyber threats
             </div>
 
-            <h1 className="font-display font-bold text-5xl sm:text-6xl text-navy-950 leading-tight mb-5">
+            <h1 className="fade-up font-display font-bold text-5xl sm:text-6xl text-white leading-tight mb-5" style={{transitionDelay:'100ms'}}>
               Free security scan<br />
-              <span className="text-ghana-red">for your business website</span>
+              <span className="text-teal-400">for your business website</span>
             </h1>
 
-            <p className="text-gray-500 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+            <p className="fade-up text-gray-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed" style={{transitionDelay:'200ms'}}>
               Find security vulnerabilities before attackers do. Enter your domain
               and get a plain-language security report in under 60 seconds — no technical
               knowledge required.
@@ -176,43 +192,43 @@ export default function HomePage() {
 
             {/* ── The scan input ── */}
             {scanning ? (
-              <div className="max-w-xl mx-auto bg-white rounded-3xl p-10 border border-navy-100 shadow-2xl flex flex-col items-center justify-center min-h-[360px] animate-in fade-in zoom-in duration-500 relative overflow-hidden">
-                {/* Simulated Progress Bar */}
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-50">
-                  <div className="h-full bg-ghana-red transition-all duration-1000 ease-out" style={{ width: `${Math.max(10, Math.random() * 80)}%` }}></div>
+              <div className="max-w-xl mx-auto card rounded-3xl p-10 flex flex-col items-center justify-center min-h-[360px] animate-in fade-in zoom-in duration-500 relative overflow-hidden">
+                {/* Teal Progress Bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-white/5">
+                  <div className="h-full bg-teal-gradient transition-all duration-1000 ease-out shadow-teal-sm" style={{ width: `${Math.max(10, Math.random() * 80)}%` }}></div>
                 </div>
-                
+
                 <div className="relative mb-8">
-                  <div className="absolute inset-0 bg-ghana-red/20 rounded-full animate-ping" style={{ animationDuration: '2s' }}></div>
-                  <div className="relative bg-navy-50 rounded-full p-5 border border-navy-100 shadow-inner">
-                    <Shield className="w-12 h-12 text-ghana-red animate-pulse" />
+                  <div className="absolute inset-0 bg-teal-500/20 rounded-full animate-ping" style={{ animationDuration: '2s' }}></div>
+                  <div className="relative bg-teal-500/10 rounded-full p-5 border border-teal-500/30">
+                    <Shield className="w-12 h-12 text-teal-400 animate-pulse" />
                   </div>
                 </div>
-                
-                <h3 className="font-display font-bold text-2xl text-navy-950 mb-4 text-center">
+
+                <h3 className="font-display font-bold text-2xl text-white mb-4 text-center">
                   Analyzing {inputMode === 'domain' ? domain : businessName}
                 </h3>
-                
+
                 <div className="flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-3 text-sm font-medium text-navy-950 bg-navy-50 px-5 py-2.5 rounded-full border border-navy-100 shadow-sm">
-                    <Loader2 className="w-4 h-4 animate-spin text-ghana-red" />
+                  <div className="flex items-center gap-3 text-sm font-medium text-gray-300 bg-white/5 px-5 py-2.5 rounded-full border border-white/10">
+                    <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
                     <span className="min-w-[260px] text-center transition-all duration-300">{currentCheck || 'Initializing scan engine...'}</span>
                   </div>
-                  <p className="text-xs text-gray-400 font-mono">This usually takes about 15 seconds</p>
+                  <p className="text-xs text-gray-500 font-mono">This usually takes about 15 seconds</p>
                 </div>
               </div>
             ) : (
               <form onSubmit={startScan} className="max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Tab switcher */}
-              <div className="flex bg-navy-100 rounded-xl p-1 mb-3">
+              <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 mb-3">
                 <button
                   type="button"
                   id="tab-domain"
                   onClick={() => { setInputMode('domain'); setLookupError(''); }}
                   className={`flex-1 text-sm font-medium py-2 px-4 rounded-lg transition-all ${
                     inputMode === 'domain'
-                      ? 'bg-white text-navy-950 shadow-sm'
-                      : 'text-gray-500 hover:text-navy-950'
+                      ? 'bg-teal-gradient text-white shadow-teal-sm'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <Globe className="w-3.5 h-3.5 inline mr-1.5" />Domain
@@ -223,20 +239,20 @@ export default function HomePage() {
                   onClick={() => { setInputMode('business'); setLookupError(''); }}
                   className={`flex-1 text-sm font-medium py-2 px-4 rounded-lg transition-all ${
                     inputMode === 'business'
-                      ? 'bg-white text-navy-950 shadow-sm'
-                      : 'text-gray-500 hover:text-navy-950'
+                      ? 'bg-teal-gradient text-white shadow-teal-sm'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <Search className="w-3.5 h-3.5 inline mr-1.5" />Business Name
                 </button>
               </div>
 
-              <div className="flex gap-3 p-2 bg-navy-50 rounded-2xl border border-navy-100">
-                <div className="flex-1 flex items-center gap-2 bg-white rounded-xl px-4 py-3 border border-gray-200">
+              <div className="flex gap-3 p-2 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex-1 flex items-center gap-2 bg-white/5 rounded-xl px-4 py-3 border border-white/10">
                   {inputMode === 'domain' ? (
-                    <Globe className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <Globe className="w-4 h-4 text-teal-400 flex-shrink-0" />
                   ) : (
-                    <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <Search className="w-4 h-4 text-teal-400 flex-shrink-0" />
                   )}
                   {inputMode === 'domain' ? (
                     <input
@@ -244,7 +260,7 @@ export default function HomePage() {
                       value={domain}
                       onChange={e => setDomain(e.target.value)}
                       placeholder="yourbusiness.com.gh"
-                      className="flex-1 text-navy-950 placeholder:text-gray-400 outline-none text-sm font-medium"
+                      className="flex-1 text-white placeholder:text-gray-500 outline-none text-sm font-medium bg-transparent"
                       disabled={scanning}
                       autoFocus
                       id="domain-input"
@@ -254,8 +270,8 @@ export default function HomePage() {
                       type="text"
                       value={businessName}
                       onChange={e => setBusinessName(e.target.value)}
-                      placeholder="e.g. Ecobank Ghana, GCB Bank, Melcom"
-                      className="flex-1 text-navy-950 placeholder:text-gray-400 outline-none text-sm font-medium"
+                      placeholder="e.g. Standard Bank, MTN Group, Safaricom"
+                      className="flex-1 text-white placeholder:text-gray-500 outline-none text-sm font-medium bg-transparent"
                       disabled={scanning}
                       autoFocus
                       id="business-name-input"
@@ -281,7 +297,7 @@ export default function HomePage() {
                   checked={authorized}
                   onChange={e => setAuthorized(e.target.checked)}
                   disabled={scanning}
-                  className="mt-0.5 rounded border-gray-300 text-ghana-red focus:ring-ghana-red cursor-pointer w-4 h-4 flex-shrink-0"
+                  className="mt-0.5 rounded border-white/20 text-teal-500 focus:ring-teal-500 cursor-pointer w-4 h-4 flex-shrink-0 bg-white/10"
                 />
                 <label htmlFor="auth-checkbox" className="text-xs text-gray-500 leading-relaxed cursor-pointer select-none">
                   I confirm I am authorized to evaluate this domain&apos;s public security posture for defensive and compliance purposes under applicable cybersecurity laws.
@@ -301,7 +317,7 @@ export default function HomePage() {
                 <div className="mt-5 bg-white rounded-2xl p-5 border border-navy-100 shadow-xl text-left animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                     <p className="text-xs font-bold uppercase tracking-wider text-navy-950 flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-ghana-red" />
+                      <Globe className="w-3.5 h-3.5 text-teal-400" />
                       Select Country / Region Option
                     </p>
                     <span className="text-xs text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full font-semibold">
@@ -327,7 +343,7 @@ export default function HomePage() {
                         <div className="flex items-center gap-3 min-w-0">
                           <span className="text-2xl flex-shrink-0" title={match.country}>{match.flag}</span>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-navy-950 truncate group-hover:text-ghana-red transition-colors">
+                            <p className="text-sm font-bold text-navy-950 truncate group-hover:text-teal-400 transition-colors">
                               {match.name}
                             </p>
                             <p className="text-xs text-gray-500 truncate font-mono mt-0.5">
@@ -350,74 +366,78 @@ export default function HomePage() {
             </form>
             )}
 
-            <p className="text-xs text-gray-400 mt-4">
+            <p className="text-xs text-gray-500 mt-4">
               Free • No signup required • Plain language results
             </p>
             {scanCount && scanCount > 0 && (
-              <p className="text-xs text-gray-400 mt-2">
-                🔒 <span className="font-semibold text-navy-950">{scanCount.toLocaleString()}</span> websites scanned so far
+              <p className="text-xs text-gray-500 mt-2">
+                🔒 <span className="font-semibold text-teal-400">{scanCount.toLocaleString()}</span> websites scanned so far
               </p>
             )}
           </div>
         </section>
 
         {/* ── Trust bar ────────────────────────────────────────── */}
-        <div className="py-6 px-6 border-y border-gray-100 bg-gray-50">
+        <div className="py-6 px-6 border-y border-white/10 bg-white/5 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-6 text-xs text-gray-400 font-medium">
-            <span className="flex items-center gap-1.5">🏦 Bank of Ghana CISD 2026 aligned</span>
-            <span className="text-gray-200">|</span>
-            <span className="flex items-center gap-1.5">🔒 Ghana Data Protection Act 843 mapped</span>
-            <span className="text-gray-200">|</span>
+            <span className="flex items-center gap-1.5">🏦 International Security Standards aligned</span>
+            <span className="text-white/20">|</span>
+            <span className="flex items-center gap-1.5">🔒 African Data Protection laws mapped</span>
+            <span className="text-white/20">|</span>
             <span className="flex items-center gap-1.5">✅ No intrusive scanning — passive checks only</span>
-            <span className="text-gray-200">|</span>
-            <span className="flex items-center gap-1.5">🇬🇭 Built in Ghana for African businesses</span>
+            <span className="text-white/20">|</span>
+            <span className="flex items-center gap-1.5">🌍 Built for African businesses</span>
           </div>
         </div>
 
         {/* ── What we scan ────────────────────────────────────── */}
-        <section className="py-16 px-6 bg-navy-50">
+        <section className="py-16 px-6 relative">
           <div className="max-w-4xl mx-auto">
-            <h2 className="font-display font-bold text-2xl text-navy-950 text-center mb-2">
+            <h2 className="fade-up font-display font-bold text-2xl text-white text-center mb-2">
               What we check
             </h2>
-            <p className="text-gray-500 text-center text-sm mb-10">
-              {CHECKS_DISPLAY.length} automated security checks — results in plain Ghanaian business language, not technical jargon.
+            <p className="fade-up text-gray-400 text-center text-sm mb-10" style={{transitionDelay:'80ms'}}>
+              {CHECKS_DISPLAY.length} automated security checks — results in plain business language, not technical jargon.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {CHECKS_DISPLAY.map(({ icon: Icon, label }) => (
-                <div key={label} className="card p-4 flex items-center gap-3">
-                  <div className="w-9 h-9 bg-navy-950 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-white" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 stagger">
+              {CHECKS_DISPLAY.slice(0, 5).map(({ icon: Icon, label }) => (
+                <div key={label} className="fade-up card-teal p-4 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0 border border-teal-500/30">
+                    <Icon className="w-4 h-4 text-teal-400" />
                   </div>
-                  <span className="text-sm font-medium text-navy-950">{label}</span>
+                  <span className="text-sm font-medium text-gray-300">{label}</span>
                 </div>
               ))}
+              <div className="fade-up card-teal p-4 flex flex-col justify-center items-center text-center bg-teal-900/20 border-teal-500/20">
+                <span className="text-xl font-bold text-teal-400">+{CHECKS_DISPLAY.length - 5}</span>
+                <span className="text-xs font-medium text-gray-400">more checks running in background</span>
+              </div>
             </div>
           </div>
         </section>
 
         {/* ── Stats ───────────────────────────────────────────── */}
-        <section className="py-16 px-6">
-          <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+        <section className="py-16 px-6 bg-white/5 border-y border-white/10">
+          <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center stagger">
             {STATS.map(({ value, label }) => (
-              <div key={label}>
-                <div className="font-display font-bold text-4xl text-ghana-red mb-2">{value}</div>
-                <p className="text-sm text-gray-500">{label}</p>
+              <div key={label} className="fade-up">
+                <div className="font-display font-bold text-4xl text-teal-400 mb-2">{value}</div>
+                <p className="text-sm text-gray-400">{label}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* ── Testimonials ─────────────────────────────────────── */}
-        <section className="py-16 px-6 bg-white">
+        <section className="py-16 px-6">
           <div className="max-w-4xl mx-auto">
-            <h2 className="font-display font-bold text-2xl text-navy-950 text-center mb-2">
-              Trusted by Ghanaian businesses
+            <h2 className="fade-up font-display font-bold text-2xl text-white text-center mb-2">
+              Trusted by businesses across Africa
             </h2>
-            <p className="text-gray-500 text-center text-sm mb-10">
+            <p className="fade-up text-gray-400 text-center text-sm mb-10" style={{transitionDelay:'80ms'}}>
               From fintech to retail — ScanVault helps businesses understand and improve their security.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 stagger">
               {[
                 {
                   quote: "We had no idea our website was exposing sensitive headers until ScanVault flagged it. Fixed in one afternoon with the copy-paste instructions.",
@@ -427,7 +447,7 @@ export default function HomePage() {
                   score: 87,
                 },
                 {
-                  quote: "The Bank of Ghana compliance checker saved us weeks of manual work. We now know exactly where our gaps are for the CISD 2026 deadline.",
+                  quote: "The compliance checker saved us weeks of manual work. We now know exactly where our gaps are for emerging data protection regulations.",
                   name: "Kofi Mensah",
                   role: "Operations Director",
                   company: "GoldCoast MFI",
@@ -441,7 +461,7 @@ export default function HomePage() {
                   score: 91,
                 },
               ].map((t, i) => (
-                <div key={i} className="card p-6 flex flex-col justify-between">
+                <div key={i} className="fade-up card p-6 flex flex-col justify-between">
                   <div>
                     <div className="flex gap-0.5 mb-4">
                       {[...Array(5)].map((_, s) => (
@@ -450,16 +470,16 @@ export default function HomePage() {
                         </svg>
                       ))}
                     </div>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.quote}"</p>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-4">"{t.quote}"</p>
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
                     <div>
-                      <p className="text-sm font-semibold text-navy-950">{t.name}</p>
-                      <p className="text-xs text-gray-400">{t.role}, {t.company}</p>
+                      <p className="text-sm font-semibold text-white">{t.name}</p>
+                      <p className="text-xs text-gray-500">{t.role}, {t.company}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-green-600">{t.score}</div>
-                      <div className="text-xs text-gray-400">Security score</div>
+                      <div className="text-lg font-bold text-teal-400">{t.score}</div>
+                      <div className="text-xs text-gray-500">Security score</div>
                     </div>
                   </div>
                 </div>
@@ -468,19 +488,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Ghana compliance callout ─────────────────────────── */}
-        <section className="py-16 px-6 bg-navy-950 text-white">
-          <div className="max-w-3xl mx-auto text-center">
-            <Shield className="w-10 h-10 text-ghana-red mx-auto mb-4" />
-            <h2 className="font-display font-bold text-3xl mb-4">
-              Built for Ghana's new cybersecurity regulations
+        {/* ── Africa compliance callout ─────────────────────────── */}
+        <section className="py-16 px-6 bg-teal-gradient relative overflow-hidden">
+          <div className="absolute inset-0 bg-navy-950/50" />
+          <div className="max-w-3xl mx-auto text-center relative stagger">
+            <Shield className="fade-up w-10 h-10 text-teal-300 mx-auto mb-4" />
+            <h2 className="fade-up font-display font-bold text-3xl mb-4">
+              Built for Africa's emerging cybersecurity standards
             </h2>
-            <p className="text-gray-300 leading-relaxed mb-8 max-w-xl mx-auto">
-              The Bank of Ghana's CISD 2026 directive and the Data Protection Act 843
+            <p className="fade-up text-gray-300 leading-relaxed mb-8 max-w-xl mx-auto">
+              Emerging regulations across the continent
               now require businesses handling customer data to meet minimum security
               standards. Our compliance checker maps your gaps directly to these requirements.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="fade-up flex flex-col sm:flex-row gap-3 justify-center">
               <a href="/compliance" className="btn-primary">Check Compliance →</a>
               <a href="/report/demo" className="btn-outline border-white text-white hover:bg-white hover:text-navy-950">See a sample report</a>
             </div>
@@ -488,19 +509,19 @@ export default function HomePage() {
         </section>
 
         {/* ── Footer ──────────────────────────────────────────── */}
-        <footer className="py-10 px-6 border-t border-gray-100">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+        <footer className="py-10 px-6 border-t border-white/10">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-navy-950 rounded flex items-center justify-center">
+              <div className="w-6 h-6 bg-teal-gradient rounded flex items-center justify-center">
                 <Shield className="w-3 h-3 text-white" />
               </div>
-              <span className="font-semibold text-navy-950">ScanVault</span>
+              <span className="font-semibold text-white">ScanVault</span>
             </div>
-            <p>Made in Ghana 🇬🇭 — Securing African businesses</p>
+            <p>Securing African businesses 🌍</p>
             <div className="flex gap-4">
-              <a href="/privacy" className="hover:text-navy-950 transition-colors">Privacy</a>
-              <a href="/terms" className="hover:text-navy-950 transition-colors">Terms</a>
-              <a href="/contact" className="hover:text-navy-950 transition-colors">Contact</a>
+              <a href="/privacy" className="hover:text-teal-400 transition-colors">Privacy</a>
+              <a href="/terms" className="hover:text-teal-400 transition-colors">Terms</a>
+              <a href="/contact" className="hover:text-teal-400 transition-colors">Contact</a>
             </div>
           </div>
         </footer>
