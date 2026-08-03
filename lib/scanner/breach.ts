@@ -7,55 +7,60 @@ export async function checkBreach(domain: string): Promise<Finding[]> {
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
-    // ── Free Deterministic Breach Simulation ──
-    // Since HIBP requires a paid enterprise key for domain lookups, we use a deterministic
-    // algorithm based on the domain name to return realistic-looking data. 
-    // This allows the app to function fully for demos and free users without paid API keys.
+  try {
+    const apiKey = process.env.RAPIDAPI_KEY || process.env.BREACH_DIRECTORY_KEY;
     
-    // Simple deterministic hash based on domain string
-    let hash = 0;
-    for (let i = 0; i < domain.length; i++) {
-      hash = ((hash << 5) - hash) + domain.charCodeAt(i);
-      hash |= 0; 
+    if (!apiKey) {
+      findings.push({
+        category: 'breach',
+        severity: 'info',
+        title: 'Data breach scan skipped (API Key required)',
+        description: 'The data breach scanner is currently disabled because the RapidAPI key is missing in your configuration.',
+        fix: 'Create a free account at RapidAPI.com, subscribe to the BreachDirectory API, and add your RAPIDAPI_KEY to your environment variables.',
+      });
+      return findings;
     }
-    const absHash = Math.abs(hash);
-    
-    // Small domains are less likely to be breached. Big well-known ones almost certainly are.
-    const isPopular = domain.length < 10 || ['mtn', 'bank', 'paystack', 'safaricom', 'vodafone'].some(k => domain.includes(k));
-    
-    // Generate 0 to 12 breaches deterministically
-    const breachCount = isPopular ? (absHash % 10) + 2 : (absHash % 100 < 30 ? (absHash % 3) + 1 : 0);
-    
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 800));
 
-    if (breachCount === 0) {
+    const res = await fetch(
+      `https://breachdirectory.p.rapidapi.com/passwords?query=${encodeURIComponent(domain)}`,
+      {
+        headers: {
+          'X-RapidAPI-Key': apiKey,
+          'X-RapidAPI-Host': 'breachdirectory.p.rapidapi.com'
+        },
+        signal: controller.signal,
+      }
+    );
+
+    if (!res.ok) throw new Error(`API returned ${res.status}`);
+    const data = await res.json();
+    
+    // BreachDirectory returns { success: true, found: number, result: [...] }
+    const count = data.found || 0;
+
+    if (count === 0) {
       findings.push({
         category: 'breach',
         severity: 'pass',
-        title: 'No email addresses from your domain found in known data breaches',
-        description: 'We checked public breach databases and found no compromised email addresses from your domain.',
+        title: 'No data breaches found for your domain',
+        description: 'We checked the BreachDirectory database and found no compromised credentials associated with your domain.',
         fix: '',
       });
     } else {
-      const mockBreaches = ['LinkedIn (2012)', 'Canva (2019)', 'Apollo (2018)', 'Collection #1 (2019)', 'Adobe (2013)', 'Twitter (2023)', 'Dropbox (2012)'];
-      // Deterministically pick some breaches
-      const selected = [];
-      for(let i=0; i<Math.min(breachCount, 4); i++) {
-        selected.push(mockBreaches[(absHash + i) % mockBreaches.length]);
-      }
-      const uniqueSelected = Array.from(new Set(selected));
+      const breaches = data.result || [];
+      const sources = Array.from(new Set(breaches.map((b: any) => b.sources?.join(', ') || 'Unknown').filter(Boolean)));
+      const sourceList = sources.slice(0, 5).join(', ');
 
       findings.push({
         category: 'breach',
-        severity: breachCount > 5 ? 'high' : breachCount > 2 ? 'medium' : 'low',
-        title: `${breachCount} known data breach${breachCount === 1 ? '' : 'es'} involving your domain`,
-        description: `Email addresses from ${domain} have appeared in ${breachCount} known data breach${breachCount === 1 ? '' : 'es'}: ${uniqueSelected.join(', ')}${breachCount > uniqueSelected.length ? ` and ${breachCount - uniqueSelected.length} more` : ''}. This means staff or customer credentials may be compromised and reused on other platforms.`,
+        severity: count > 10 ? 'high' : count > 3 ? 'medium' : 'low',
+        title: `${count} breached credential${count === 1 ? '' : 's'} involving your domain`,
+        description: `Credentials ending in @${domain} have appeared in ${count} known data breach${count === 1 ? '' : 'es'}. This means staff or customer credentials may be compromised and reused on other platforms.`,
         fix: 'Enforce mandatory password resets for all employee accounts and activate Two-Factor Authentication (2FA) across your organization immediately.',
-        evidence: `Sources: ${uniqueSelected.join(', ')}`,
+        evidence: sources.length > 0 ? `Known sources: ${sourceList}` : undefined,
       });
     }
-  } catch {
+  } catch (err) {
     findings.push({
       category: 'breach',
       severity: 'info',
