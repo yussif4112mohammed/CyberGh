@@ -172,17 +172,17 @@ function ReportContent() {
               
               <div>
                 <label className="block text-sm font-semibold text-navy-950 mb-1.5">Your Agency Name</label>
-                <input type="text" required className="input" placeholder="e.g. CyberTech Security" 
+                <input type="text" required className="w-full px-4 py-3 rounded-xl text-navy-950 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-gray-400 transition-all duration-200" placeholder="e.g. CyberTech Security" 
                   value={wlConfig.agency} onChange={e => setWlConfig({...wlConfig, agency: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-navy-950 mb-1.5">Client Name (Target)</label>
-                <input type="text" required className="input" placeholder={`e.g. ${result.domain}`} 
+                <input type="text" required className="w-full px-4 py-3 rounded-xl text-navy-950 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-gray-400 transition-all duration-200" placeholder={`e.g. ${result.domain}`} 
                   value={wlConfig.client} onChange={e => setWlConfig({...wlConfig, client: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-navy-950 mb-1.5">Custom Logo URL <span className="text-gray-400 font-normal">(Optional)</span></label>
-                <input type="url" className="input" placeholder="https://youragency.com/logo.png" 
+                <input type="url" className="w-full px-4 py-3 rounded-xl text-navy-950 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-gray-400 transition-all duration-200" placeholder="https://youragency.com/logo.png" 
                   value={wlConfig.logo} onChange={e => setWlConfig({...wlConfig, logo: e.target.value})} />
               </div>
               
