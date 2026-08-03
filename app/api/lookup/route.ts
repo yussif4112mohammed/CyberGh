@@ -311,14 +311,14 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: `"${query}" could not be found automatically. Please enter their website domain directly (e.g. example.com.gh).` },
+      { error: `"${query}" could not be found automatically. Please enter their website domain directly (e.g. example.com).` },
       { status: 404 }
     );
 
   } catch (err: any) {
     console.error('Lookup error:', err);
     return NextResponse.json(
-      { error: 'Lookup failed. Please enter the domain directly (e.g. example.com.gh).' },
+      { error: 'Lookup failed. Please enter the domain directly (e.g. example.com).' },
       { status: 500 }
     );
   }

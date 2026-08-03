@@ -248,20 +248,21 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <div className="flex gap-3 p-2 bg-white/5 rounded-2xl border border-white/10">
-                <div className="flex-1 flex items-center gap-2 bg-white/5 rounded-xl px-4 py-3 border border-white/10">
+              <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white/5 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-2xl relative group">
+                <div className="absolute inset-0 bg-teal-500/5 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="flex-1 flex items-center gap-3 bg-navy-950/50 rounded-full px-5 py-3.5 border border-white/5 focus-within:border-teal-500/50 focus-within:bg-navy-950/80 transition-all duration-300 relative z-10">
                   {inputMode === 'domain' ? (
-                    <Globe className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                    <Globe className="w-5 h-5 text-teal-400 flex-shrink-0" />
                   ) : (
-                    <Search className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                    <Search className="w-5 h-5 text-teal-400 flex-shrink-0" />
                   )}
                   {inputMode === 'domain' ? (
                     <input
                       type="text"
                       value={domain}
                       onChange={e => setDomain(e.target.value)}
-                      placeholder="yourbusiness.com.gh"
-                      className="flex-1 text-white placeholder:text-gray-500 outline-none text-sm font-medium bg-transparent"
+                      placeholder="yourbusiness.com"
+                      className="flex-1 text-white placeholder:text-gray-500 outline-none text-base font-medium bg-transparent"
                       disabled={scanning}
                       autoFocus
                       id="domain-input"
@@ -272,7 +273,7 @@ export default function HomePage() {
                       value={businessName}
                       onChange={e => setBusinessName(e.target.value)}
                       placeholder="e.g. Standard Bank, MTN Group, Safaricom"
-                      className="flex-1 text-white placeholder:text-gray-500 outline-none text-sm font-medium bg-transparent"
+                      className="flex-1 text-white placeholder:text-gray-500 outline-none text-base font-medium bg-transparent"
                       disabled={scanning}
                       autoFocus
                       id="business-name-input"
@@ -282,10 +283,10 @@ export default function HomePage() {
                 <button
                   type="submit"
                   disabled={scanning || !authorized || (inputMode === 'domain' ? !domain.trim() : !businessName.trim())}
-                  className="btn-primary text-sm px-5 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary text-base font-semibold px-8 py-3.5 rounded-full disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_30px_rgba(20,184,166,0.5)] transition-all duration-300 flex-shrink-0 relative z-10"
                   id="scan-submit-btn"
                 >
-                  {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  {scanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                   {scanning ? 'Scanning...' : 'Scan Now'}
                 </button>
               </div>
