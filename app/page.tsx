@@ -23,7 +23,7 @@ const CHECKS_DISPLAY = [
 
 const STATS = [
   { value: '78%',  label: 'of African SMEs have no security policy' },
-  { value: '$50k+', label: 'average cost of a data breach for SMEs' },
+  { value: '43%', label: 'of all cyber attacks specifically target small businesses' },
   { value: '1M+', label: 'businesses across Africa trust our insights' },
 ];
 
