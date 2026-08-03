@@ -60,57 +60,68 @@ const CRITICAL_PORTS: PortCheck[] = [
   },
 ];
 
-async function isPortOpen(host: string, port: number, timeoutMs = 3000): Promise<boolean> {
-  return new Promise((resolve) => {
-    const socket = new net.Socket();
-    let resolved = false;
-
-    const cleanup = (result: boolean) => {
-      if (resolved) return;
-      resolved = true;
-      socket.destroy();
-      resolve(result);
-    };
-
-    socket.setTimeout(timeoutMs);
-    socket.connect(port, host, () => cleanup(true));
-    socket.on('error', () => cleanup(false));
-    socket.on('timeout', () => cleanup(false));
-  });
-}
-
 export async function checkPorts(domain: string): Promise<Finding[]> {
   const findings: Finding[] = [];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
-  const results = await Promise.all(
-    CRITICAL_PORTS.map(async (check) => {
-      const open = await isPortOpen(domain, check.port);
-      return { check, open };
-    })
-  );
+  try {
+    const res = await fetch(`https://api.hackertarget.com/nmap/?q=${encodeURIComponent(domain)}`, {
+      headers: { 'User-Agent': 'ScanVault-Scanner/1.0' },
+      signal: controller.signal,
+    });
+    
+    if (!res.ok) throw new Error('API Error');
+    const text = await res.text();
+    
+    // Check if HackerTarget rate limited us
+    if (text.includes('API count exceeded') || text.includes('error')) {
+      throw new Error('Rate limited');
+    }
 
-  const openPorts = results.filter(r => r.open);
-  const closedCritical = results.filter(r => !r.open && r.check.severity === 'critical');
+    const openPorts: PortCheck[] = [];
+    const lines = text.split('\n');
+    
+    for (const check of CRITICAL_PORTS) {
+      // Look for a line like "3306/tcp open mysql"
+      const portRegex = new RegExp(`^${check.port}\\/tcp\\s+open`, 'i');
+      if (lines.some(line => portRegex.test(line))) {
+        openPorts.push(check);
+      }
+    }
 
-  for (const { check } of openPorts) {
+    for (const check of openPorts) {
+      findings.push({
+        category: 'ports',
+        severity: check.severity,
+        title: `${check.name} port is open to the internet (port ${check.port})`,
+        description: check.description,
+        fix: check.fix,
+        evidence: `HackerTarget Nmap scan detected port ${check.port}/tcp as OPEN`,
+      });
+    }
+
+    if (openPorts.length === 0) {
+      findings.push({
+        category: 'ports',
+        severity: 'pass',
+        title: 'No critical ports exposed to the internet',
+        description: 'We checked commonly targeted ports and found none of them publicly accessible.',
+        fix: '',
+      });
+    }
+
+  } catch (err) {
+    // If the API fails (rate limits, timeouts), degrade gracefully
     findings.push({
       category: 'ports',
-      severity: check.severity,
-      title: `${check.name} port is open to the internet (port ${check.port})`,
-      description: check.description,
-      fix: check.fix,
-      evidence: `Port ${check.port} responded to connection attempt`,
+      severity: 'info',
+      title: 'Port scan could not complete',
+      description: 'The port scanning service is temporarily unavailable or blocked.',
+      fix: 'Manually verify your firewall rules to ensure database ports (3306, 5432, 27017) are closed to the public.',
     });
-  }
-
-  if (openPorts.length === 0) {
-    findings.push({
-      category: 'ports',
-      severity: 'pass',
-      title: 'No critical ports exposed to the internet',
-      description: 'We checked 8 commonly targeted ports and found none of them publicly accessible from the internet.',
-      fix: '',
-    });
+  } finally {
+    clearTimeout(timeout);
   }
 
   return findings;
